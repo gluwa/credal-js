@@ -7,7 +7,14 @@ const main = async () => {
     const keyring = new Keyring({ type: 'sr25519' });
     const signer = keyring.addFromUri('//Alice');
 
-    await registerAddress(api, '0x1234567890123456789012345678901234567890', 'Ethereum', signer);
+    await registerAddress(
+        api,
+        '0x1234567890123456789012345678901234567890',
+        'Ethereum',
+        signer,
+        (_) => api.disconnect(),
+        (_) => api.disconnect(),
+    );
 };
 
 main().catch(console.error);
