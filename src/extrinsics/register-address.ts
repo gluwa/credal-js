@@ -1,8 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
-import { Blockchain } from 'model';
+import { Blockchain } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { handleTransaction } from 'utils';
-import { TxOnFail, TxOnSuccess } from 'types';
+import { handleTransaction } from '../utils';
+import { TxOnFail, TxOnSuccess } from '../types';
 
 export const registerAddress = async (
     api: ApiPromise,

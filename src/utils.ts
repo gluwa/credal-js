@@ -11,13 +11,11 @@ export const handleTransaction = async (
     console.log(`current status is ${status}`);
     if (dispatchError) {
         if (dispatchError.isModule) {
-            // for module errors, we have the section indexed, lookup
             const decoded = api.registry.findMetaError(dispatchError.asModule);
             const { docs, name, section } = decoded;
 
             console.log(`${section}.${name}: ${docs.join(' ')}`);
         } else {
-            // Other, CannotLookup, BadOrigin, no extra info
             console.log(dispatchError.toString());
         }
 

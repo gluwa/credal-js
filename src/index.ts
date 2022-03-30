@@ -12,8 +12,8 @@ const main = async () => {
         '0x1234567890123456789012345678901234567890',
         'Ethereum',
         signer,
-        (_) => api.disconnect(),
-        (_) => api.disconnect(),
+        () => api.disconnect(),
+        () => api.disconnect(),
     );
 };
 

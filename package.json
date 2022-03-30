@@ -1,8 +1,9 @@
 {
     "name": "credal-js",
-    "version": "0.1.0",
+    "version": "0.1.3",
     "author": "Jeremy Frank <jeremy.frank@gluwa.com>",
     "license": "MIT",
+    "main": "lib/index.js",
     "files": [
         "lib/**/*"
     ],
