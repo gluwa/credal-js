@@ -6,6 +6,11 @@ import { TxOnFail, TxOnSuccess } from '../types';
 import { AddressConverter } from '../transform';
 import { GenericEventData } from '@polkadot/types/';
 
+type RegisteredAddress = {
+    addressId: string;
+    address: Address;
+};
+
 export const registerAddress = async (
     api: ApiPromise,
     externalAddress: string,
@@ -17,11 +22,6 @@ export const registerAddress = async (
     const unsubscribe: () => void = await api.tx.creditcoin
         .registerAddress(blockchain, externalAddress)
         .signAndSend(signer, { nonce: -1 }, (result) => handleTransaction(api, unsubscribe, result, onSuccess, onFail));
-};
-
-type RegisteredAddress = {
-    addressId: string;
-    address: Address;
 };
 
 const processRegisteredAddress = (api: ApiPromise, result: SubmittableResult): RegisteredAddress | undefined => {
@@ -42,9 +42,9 @@ export const registerAddressAsync = async (
     blockchain: Blockchain,
     signer: KeyringPair,
 ) => {
-    return new Promise<RegisteredAddress | undefined>(async (resolve) => {
+    return new Promise<RegisteredAddress | undefined>((resolve) => {
         const onFail = () => resolve(undefined);
         const onSuccess = (result: SubmittableResult) => resolve(processRegisteredAddress(api, result));
-        await registerAddress(api, externalAddress, blockchain, signer, onSuccess, onFail);
+        registerAddress(api, externalAddress, blockchain, signer, onSuccess, onFail);
     });
 };

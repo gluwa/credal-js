@@ -1,6 +1,6 @@
 {
     "name": "credal-js",
-    "version": "0.1.3",
+    "version": "0.1.5",
     "author": "Jeremy Frank <jeremy.frank@gluwa.com>",
     "license": "MIT",
     "main": "lib/index.js",
@@ -9,7 +9,7 @@
     ],
     "scripts": {
         "build": "tsc",
-        "start": "ts-node ./src/index.ts",
+        "start": "ts-node ./src/example.ts",
         "build:types": "yarn generate:defs && yarn generate:meta",
         "generate:defs": "ts-node --skip-project node_modules/.bin/polkadot-types-from-defs --package credal-js/interfaces --input ./src/interfaces --endpoint ./creditcoin.json",
         "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package credal-js/interfaces  --endpoint ./creditcoin.json --output ./src/interfaces",
