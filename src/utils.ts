@@ -5,7 +5,7 @@ export const handleTransaction = async (
     unsubscribe: () => void,
     result: SubmittableResult,
     onSuccess: (result: SubmittableResult) => void,
-    onFail: (result: SubmittableResult | Error | undefined) => void,
+    onFail: (result: SubmittableResult) => void,
 ) => {
     const { status, events, dispatchError } = result;
     console.log(`current status is ${status}`);
