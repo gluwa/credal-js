@@ -1,14 +1,14 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 
-export const handleTransaction = async (
+export const handleTransaction = (
     api: ApiPromise,
     unsubscribe: () => void,
     result: SubmittableResult,
-    onSuccess: (result: SubmittableResult) => void,
-    onFail: (result: SubmittableResult) => void,
+    onSuccess: (r: SubmittableResult) => void,
+    onFail: (r: SubmittableResult) => void,
 ) => {
     const { status, events, dispatchError } = result;
-    console.log(`current status is ${status}`);
+    console.log(`current status is ${status.toString()}`);
     if (dispatchError) {
         if (dispatchError.isModule) {
             const decoded = api.registry.findMetaError(dispatchError.asModule);
