@@ -13,7 +13,7 @@ export type Address = {
 };
 
 export type LoanTerms = {
-    amount: number;
+    amount: BigInt;
     interestRate: number;
     maturity: Date;
 };
