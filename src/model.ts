@@ -11,3 +11,26 @@ export type Address = {
     blockchain: Blockchain;
     externalAddress: ExternalAddress;
 };
+
+export type LoanTerms = {
+    amount: number;
+    interestRate: number;
+    maturity: Date;
+};
+
+type AskOrBidOrderBase = {
+    loanTerms: LoanTerms;
+    expirationBlock: number;
+    blockNumber: number;
+    blockchain: Blockchain;
+};
+
+export type AskOrder = AskOrBidOrderBase & {
+    lenderAddressId: AddressId;
+    lenderAccountId: AccountId;
+};
+
+export type BidOrder = AskOrBidOrderBase & {
+    borrowerAddressId: AddressId;
+    borrowerAccountId: AccountId;
+};
