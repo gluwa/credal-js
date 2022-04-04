@@ -1,13 +1,17 @@
-import { PalletCreditcoinAddress, PalletCreditcoinAskOrder } from '@polkadot/types/lookup';
-import { Address } from './model';
+import { PalletCreditcoinAddress, PalletCreditcoinAskOrder, PalletCreditcoinLoanTerms } from '@polkadot/types/lookup';
+import { Address, AskOrder, LoanTerms } from './model';
 
-export const createAddress = ({ value, blockchain, owner }: PalletCreditcoinAddress): Address => {
-    return {
-        accountId: owner.toString(),
-        blockchain: blockchain.type,
-        externalAddress: value.toString(),
-    };
-};
+export const createAddress = ({ value, blockchain, owner }: PalletCreditcoinAddress): Address => ({
+    accountId: owner.toString(),
+    blockchain: blockchain.type,
+    externalAddress: value.toString(),
+});
+
+export const createLoanTerms = ({ amount, interestRate, maturity }: PalletCreditcoinLoanTerms): LoanTerms => ({
+    amount: amount.toBigInt(),
+    interestRate: interestRate.toNumber(),
+    maturity: new Date(maturity.toNumber()),
+});
 
 export const createAskOrder = ({
     blockchain,
@@ -16,15 +20,11 @@ export const createAskOrder = ({
     expirationBlock,
     block,
     lender,
-}: PalletCreditcoinAskOrder) => ({
+}: PalletCreditcoinAskOrder): AskOrder => ({
     blockchain: blockchain.type,
     blockNumber: block.toNumber(),
     expirationBlock: expirationBlock.toNumber(),
-    loanTerms: {
-        amount: terms.amount.toNumber(),
-        interestRate: terms.interestRate.toNumber(),
-        maturity: new Date(terms.maturity.toNumber()),
-    },
+    loanTerms: createLoanTerms(terms),
     lenderAddressId: lenderAddressId.toString(),
     lenderAccountId: lender.toString(),
 });
