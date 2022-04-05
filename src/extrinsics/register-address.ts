@@ -25,29 +25,31 @@ export const registerAddress = async (
         .signAndSend(signer, { nonce: -1 }, (result) => handleTransaction(api, unsubscribe, result, onSuccess, onFail));
 };
 
-const processRegisteredAddress = (api: ApiPromise, result: SubmittableResult): RegisteredAddress | ExtrinsicFailed => {
+const processRegisteredAddress = (api: ApiPromise, result: SubmittableResult): RegisteredAddress => {
     const { events } = result;
     const addressRegistered = events.find(({ event }) => event.method === 'AddressRegistered');
+    if (!addressRegistered) throw new Error('Register Address call returned invalid data');
 
     const getData = (data: GenericEventData) => {
         const addressId = data[0].toString();
         const address = createAddress(api.createType('PalletCreditcoinAddress', data[1]));
         return { addressId, address };
     };
-    return addressRegistered ? getData(addressRegistered.event.data) : 'unknown error';
+
+    return getData(addressRegistered.event.data);
 };
 
-const registerAddressFailed = (api: ApiPromise, result: SubmittableResult): ExtrinsicFailed => {
+const registerAddressFailed = (api: ApiPromise, result: SubmittableResult) => {
     const { dispatchError } = result;
     if (dispatchError) {
         if (dispatchError.isModule) {
             const decoded = api.registry.findMetaError(dispatchError.asModule);
             const { docs, name, section } = decoded;
-            return `${section}.${name}: ${docs.join(' ')}`;
+            return Error(`${section}.${name}: ${docs.join(' ')}`);
         }
-        return dispatchError.toString();
+        return new Error(dispatchError.toString());
     }
-    return 'Unknown Error';
+    return new Error('Unknown Error');
 };
 
 export const registerAddressAsync = async (
@@ -56,7 +58,7 @@ export const registerAddressAsync = async (
     blockchain: Blockchain,
     signer: KeyringPair,
 ) => {
-    return new Promise<RegisteredAddress | ExtrinsicFailed>((resolve, reject) => {
+    return new Promise<RegisteredAddress>((resolve, reject) => {
         const onFail = (result: SubmittableResult) => reject(registerAddressFailed(api, result));
         const onSuccess = (result: SubmittableResult) => resolve(processRegisteredAddress(api, result));
         registerAddress(api, externalAddress, blockchain, signer, onSuccess, onFail).catch((reason) => reject(reason));
