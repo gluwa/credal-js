@@ -666,8 +666,8 @@ export default {
         expirationBlock: 'u32',
         askGuid: 'Bytes',
         bidGuid: 'Bytes',
-        borrowerKey: 'SpCoreEcdsaPublic',
-        borrowerSignature: 'SpCoreEcdsaSignature',
+        borrowerKey: 'SpRuntimeMultiSigner',
+        borrowerSignature: 'SpRuntimeMultiSignature',
       },
       close_deal_order: {
         dealOrderId: 'PalletCreditcoinDealOrderId',
@@ -696,11 +696,47 @@ export default {
    **/
   SpCoreEcdsaPublic: '[u8;33]',
   /**
-   * Lookup110: sp_core::ecdsa::Signature
+   * Lookup110: sp_runtime::MultiSigner
+   **/
+  SpRuntimeMultiSigner: {
+    _enum: {
+      Ed25519: 'SpCoreEd25519Public',
+      Sr25519: 'SpCoreSr25519Public',
+      Ecdsa: 'SpCoreEcdsaPublic'
+    }
+  },
+  /**
+   * Lookup111: sp_core::ed25519::Public
+   **/
+  SpCoreEd25519Public: '[u8;32]',
+  /**
+   * Lookup112: sp_core::sr25519::Public
+   **/
+  SpCoreSr25519Public: '[u8;32]',
+  /**
+   * Lookup113: sp_runtime::MultiSignature
+   **/
+  SpRuntimeMultiSignature: {
+    _enum: {
+      Ed25519: 'SpCoreEd25519Signature',
+      Sr25519: 'SpCoreSr25519Signature',
+      Ecdsa: 'SpCoreEcdsaSignature'
+    }
+  },
+  /**
+   * Lookup114: sp_core::ed25519::Signature
+   **/
+  SpCoreEd25519Signature: '[u8;64]',
+  /**
+   * Lookup116: sp_core::sr25519::Signature
+   **/
+  SpCoreSr25519Signature: '[u8;64]',
+  /**
+   * Lookup117: sp_core::ecdsa::Signature
    **/
   SpCoreEcdsaSignature: '[u8;65]',
   /**
-   * Lookup112: pallet_difficulty::pallet::Call<T>
+   * Lookup119: pallet_difficulty::pallet::Call<T>
    **/
   PalletDifficultyCall: {
     _enum: {
@@ -713,13 +749,13 @@ export default {
     }
   },
   /**
-   * Lookup114: pallet_sudo::pallet::Error<T>
+   * Lookup121: pallet_sudo::pallet::Error<T>
    **/
   PalletSudoError: {
     _enum: ['RequireSudo']
   },
   /**
-   * Lookup116: pallet_creditcoin::types::UnverifiedTransfer<sp_core::crypto::AccountId32, BlockNum, primitive_types::H256>
+   * Lookup123: pallet_creditcoin::types::UnverifiedTransfer<sp_core::crypto::AccountId32, BlockNum, primitive_types::H256>
    **/
   PalletCreditcoinUnverifiedTransfer: {
     transfer: 'PalletCreditcoinTransfer',
@@ -727,68 +763,50 @@ export default {
     toExternal: 'Bytes'
   },
   /**
-   * Lookup119: pallet_creditcoin::pallet::Error<T>
+   * Lookup126: pallet_creditcoin::pallet::Error<T>
    **/
   PalletCreditcoinError: {
-    _enum: ['AddressAlreadyRegistered', 'NonExistentAddress', 'NonExistentDealOrder', 'NonExistentAskOrder', 'NonExistentBidOrder', 'NonExistentOffer', 'NonExistentTransfer', 'TransferAlreadyRegistered', 'TransferMismatch', 'TransferAlreadyProcessed', 'TransferAmountInsufficient', 'MalformedTransfer', 'UnsupportedTransferKind', 'InsufficientAuthority', 'NonExistentRepaymentOrder', 'DuplicateId', 'NotAddressOwner', 'OffchainSignedTxFailed', 'NoLocalAcctForSignedTx', 'RepaymentOrderNonZeroGain', 'AddressPlatformMismatch', 'AlreadyAuthority', 'DuplicateOffer', 'DealNotFunded', 'DealOrderAlreadyFunded', 'DealOrderAlreadyClosed', 'DealOrderAlreadyLocked', 'DealOrderMustBeLocked', 'DuplicateDealOrder', 'DealOrderExpired', 'AskOrderExpired', 'BidOrderExpired', 'OfferExpired', 'AskBidMismatch', 'SameOwner', 'InvalidSignature', 'NotBorrower', 'MalformedDealOrder', 'NotLender', 'ScaleDecodeError', 'UnverifiedTransferPoolFull', 'RepaymentOrderUnsupported', 'NotLegacyWalletOwner', 'LegacySighashMalformed', 'LegacyWalletNotFound', 'LegacyBalanceKeeperMissing', 'VerifyStringTooLong', 'GuidAlreadyUsed', 'InvalidMaturity']
+    _enum: ['AddressAlreadyRegistered', 'NonExistentAddress', 'NonExistentDealOrder', 'NonExistentAskOrder', 'NonExistentBidOrder', 'NonExistentOffer', 'NonExistentTransfer', 'TransferAlreadyRegistered', 'TransferMismatch', 'TransferAlreadyProcessed', 'TransferAmountInsufficient', 'MalformedTransfer', 'UnsupportedTransferKind', 'InsufficientAuthority', 'DuplicateId', 'NotAddressOwner', 'OffchainSignedTxFailed', 'NoLocalAcctForSignedTx', 'RepaymentOrderNonZeroGain', 'AddressPlatformMismatch', 'AlreadyAuthority', 'DuplicateOffer', 'DealNotFunded', 'DealOrderAlreadyFunded', 'DealOrderAlreadyClosed', 'DealOrderAlreadyLocked', 'DealOrderMustBeLocked', 'DuplicateDealOrder', 'DealOrderExpired', 'AskOrderExpired', 'BidOrderExpired', 'OfferExpired', 'AskBidMismatch', 'SameOwner', 'InvalidSignature', 'NotBorrower', 'MalformedDealOrder', 'NotLender', 'UnverifiedTransferPoolFull', 'RepaymentOrderUnsupported', 'NotLegacyWalletOwner', 'LegacyWalletNotFound', 'LegacyBalanceKeeperMissing', 'GuidAlreadyUsed', 'InvalidMaturity', 'MalformedExternalAddress']
   },
   /**
-   * Lookup121: pallet_difficulty::DifficultyAndTimestamp<Moment>
+   * Lookup128: pallet_difficulty::DifficultyAndTimestamp<Moment>
    **/
   PalletDifficultyDifficultyAndTimestamp: {
     difficulty: 'U256',
     timestamp: 'u64'
   },
   /**
-   * Lookup123: pallet_difficulty::pallet::Error<T>
+   * Lookup130: pallet_difficulty::pallet::Error<T>
    **/
   PalletDifficultyError: {
     _enum: ['ZeroTargetTime', 'ZeroAdjustmentPeriod', 'NegativeAdjustmentPeriod']
   },
   /**
-   * Lookup125: sp_runtime::MultiSignature
-   **/
-  SpRuntimeMultiSignature: {
-    _enum: {
-      Ed25519: 'SpCoreEd25519Signature',
-      Sr25519: 'SpCoreSr25519Signature',
-      Ecdsa: 'SpCoreEcdsaSignature'
-    }
-  },
-  /**
-   * Lookup126: sp_core::ed25519::Signature
-   **/
-  SpCoreEd25519Signature: '[u8;64]',
-  /**
-   * Lookup128: sp_core::sr25519::Signature
-   **/
-  SpCoreSr25519Signature: '[u8;64]',
-  /**
-   * Lookup130: frame_system::extensions::check_spec_version::CheckSpecVersion<T>
+   * Lookup133: frame_system::extensions::check_spec_version::CheckSpecVersion<T>
    **/
   FrameSystemExtensionsCheckSpecVersion: 'Null',
   /**
-   * Lookup131: frame_system::extensions::check_tx_version::CheckTxVersion<T>
+   * Lookup134: frame_system::extensions::check_tx_version::CheckTxVersion<T>
    **/
   FrameSystemExtensionsCheckTxVersion: 'Null',
   /**
-   * Lookup132: frame_system::extensions::check_genesis::CheckGenesis<T>
+   * Lookup135: frame_system::extensions::check_genesis::CheckGenesis<T>
    **/
   FrameSystemExtensionsCheckGenesis: 'Null',
   /**
-   * Lookup135: frame_system::extensions::check_nonce::CheckNonce<T>
+   * Lookup138: frame_system::extensions::check_nonce::CheckNonce<T>
    **/
   FrameSystemExtensionsCheckNonce: 'Compact<u32>',
   /**
-   * Lookup136: frame_system::extensions::check_weight::CheckWeight<T>
+   * Lookup139: frame_system::extensions::check_weight::CheckWeight<T>
    **/
   FrameSystemExtensionsCheckWeight: 'Null',
   /**
-   * Lookup137: pallet_transaction_payment::ChargeTransactionPayment<T>
+   * Lookup140: pallet_transaction_payment::ChargeTransactionPayment<T>
    **/
   PalletTransactionPaymentChargeTransactionPayment: 'Compact<u128>',
   /**
-   * Lookup138: creditcoin_node_runtime::Runtime
+   * Lookup141: creditcoin_node_runtime::Runtime
    **/
   CreditcoinNodeRuntimeRuntime: 'Null'
 };

@@ -693,8 +693,8 @@ declare module '@polkadot/types/lookup' {
       readonly expirationBlock: u32;
       readonly askGuid: Bytes;
       readonly bidGuid: Bytes;
-      readonly borrowerKey: SpCoreEcdsaPublic;
-      readonly borrowerSignature: SpCoreEcdsaSignature;
+      readonly borrowerKey: SpRuntimeMultiSigner;
+      readonly borrowerSignature: SpRuntimeMultiSignature;
     } & Struct;
     readonly isCloseDealOrder: boolean;
     readonly asCloseDealOrder: {
@@ -727,10 +727,44 @@ declare module '@polkadot/types/lookup' {
   /** @name SpCoreEcdsaPublic (108) */
   export interface SpCoreEcdsaPublic extends U8aFixed {}
 
-  /** @name SpCoreEcdsaSignature (110) */
+  /** @name SpRuntimeMultiSigner (110) */
+  export interface SpRuntimeMultiSigner extends Enum {
+    readonly isEd25519: boolean;
+    readonly asEd25519: SpCoreEd25519Public;
+    readonly isSr25519: boolean;
+    readonly asSr25519: SpCoreSr25519Public;
+    readonly isEcdsa: boolean;
+    readonly asEcdsa: SpCoreEcdsaPublic;
+    readonly type: 'Ed25519' | 'Sr25519' | 'Ecdsa';
+  }
+
+  /** @name SpCoreEd25519Public (111) */
+  export interface SpCoreEd25519Public extends U8aFixed {}
+
+  /** @name SpCoreSr25519Public (112) */
+  export interface SpCoreSr25519Public extends U8aFixed {}
+
+  /** @name SpRuntimeMultiSignature (113) */
+  export interface SpRuntimeMultiSignature extends Enum {
+    readonly isEd25519: boolean;
+    readonly asEd25519: SpCoreEd25519Signature;
+    readonly isSr25519: boolean;
+    readonly asSr25519: SpCoreSr25519Signature;
+    readonly isEcdsa: boolean;
+    readonly asEcdsa: SpCoreEcdsaSignature;
+    readonly type: 'Ed25519' | 'Sr25519' | 'Ecdsa';
+  }
+
+  /** @name SpCoreEd25519Signature (114) */
+  export interface SpCoreEd25519Signature extends U8aFixed {}
+
+  /** @name SpCoreSr25519Signature (116) */
+  export interface SpCoreSr25519Signature extends U8aFixed {}
+
+  /** @name SpCoreEcdsaSignature (117) */
   export interface SpCoreEcdsaSignature extends U8aFixed {}
 
-  /** @name PalletDifficultyCall (112) */
+  /** @name PalletDifficultyCall (119) */
   export interface PalletDifficultyCall extends Enum {
     readonly isSetTargetBlockTime: boolean;
     readonly asSetTargetBlockTime: {
@@ -743,20 +777,20 @@ declare module '@polkadot/types/lookup' {
     readonly type: 'SetTargetBlockTime' | 'SetAdjustmentPeriod';
   }
 
-  /** @name PalletSudoError (114) */
+  /** @name PalletSudoError (121) */
   export interface PalletSudoError extends Enum {
     readonly isRequireSudo: boolean;
     readonly type: 'RequireSudo';
   }
 
-  /** @name PalletCreditcoinUnverifiedTransfer (116) */
+  /** @name PalletCreditcoinUnverifiedTransfer (123) */
   export interface PalletCreditcoinUnverifiedTransfer extends Struct {
     readonly transfer: PalletCreditcoinTransfer;
     readonly fromExternal: Bytes;
     readonly toExternal: Bytes;
   }
 
-  /** @name PalletCreditcoinError (119) */
+  /** @name PalletCreditcoinError (126) */
   export interface PalletCreditcoinError extends Enum {
     readonly isAddressAlreadyRegistered: boolean;
     readonly isNonExistentAddress: boolean;
@@ -772,7 +806,6 @@ declare module '@polkadot/types/lookup' {
     readonly isMalformedTransfer: boolean;
     readonly isUnsupportedTransferKind: boolean;
     readonly isInsufficientAuthority: boolean;
-    readonly isNonExistentRepaymentOrder: boolean;
     readonly isDuplicateId: boolean;
     readonly isNotAddressOwner: boolean;
     readonly isOffchainSignedTxFailed: boolean;
@@ -797,26 +830,24 @@ declare module '@polkadot/types/lookup' {
     readonly isNotBorrower: boolean;
     readonly isMalformedDealOrder: boolean;
     readonly isNotLender: boolean;
-    readonly isScaleDecodeError: boolean;
     readonly isUnverifiedTransferPoolFull: boolean;
     readonly isRepaymentOrderUnsupported: boolean;
     readonly isNotLegacyWalletOwner: boolean;
-    readonly isLegacySighashMalformed: boolean;
     readonly isLegacyWalletNotFound: boolean;
     readonly isLegacyBalanceKeeperMissing: boolean;
-    readonly isVerifyStringTooLong: boolean;
     readonly isGuidAlreadyUsed: boolean;
     readonly isInvalidMaturity: boolean;
-    readonly type: 'AddressAlreadyRegistered' | 'NonExistentAddress' | 'NonExistentDealOrder' | 'NonExistentAskOrder' | 'NonExistentBidOrder' | 'NonExistentOffer' | 'NonExistentTransfer' | 'TransferAlreadyRegistered' | 'TransferMismatch' | 'TransferAlreadyProcessed' | 'TransferAmountInsufficient' | 'MalformedTransfer' | 'UnsupportedTransferKind' | 'InsufficientAuthority' | 'NonExistentRepaymentOrder' | 'DuplicateId' | 'NotAddressOwner' | 'OffchainSignedTxFailed' | 'NoLocalAcctForSignedTx' | 'RepaymentOrderNonZeroGain' | 'AddressPlatformMismatch' | 'AlreadyAuthority' | 'DuplicateOffer' | 'DealNotFunded' | 'DealOrderAlreadyFunded' | 'DealOrderAlreadyClosed' | 'DealOrderAlreadyLocked' | 'DealOrderMustBeLocked' | 'DuplicateDealOrder' | 'DealOrderExpired' | 'AskOrderExpired' | 'BidOrderExpired' | 'OfferExpired' | 'AskBidMismatch' | 'SameOwner' | 'InvalidSignature' | 'NotBorrower' | 'MalformedDealOrder' | 'NotLender' | 'ScaleDecodeError' | 'UnverifiedTransferPoolFull' | 'RepaymentOrderUnsupported' | 'NotLegacyWalletOwner' | 'LegacySighashMalformed' | 'LegacyWalletNotFound' | 'LegacyBalanceKeeperMissing' | 'VerifyStringTooLong' | 'GuidAlreadyUsed' | 'InvalidMaturity';
+    readonly isMalformedExternalAddress: boolean;
+    readonly type: 'AddressAlreadyRegistered' | 'NonExistentAddress' | 'NonExistentDealOrder' | 'NonExistentAskOrder' | 'NonExistentBidOrder' | 'NonExistentOffer' | 'NonExistentTransfer' | 'TransferAlreadyRegistered' | 'TransferMismatch' | 'TransferAlreadyProcessed' | 'TransferAmountInsufficient' | 'MalformedTransfer' | 'UnsupportedTransferKind' | 'InsufficientAuthority' | 'DuplicateId' | 'NotAddressOwner' | 'OffchainSignedTxFailed' | 'NoLocalAcctForSignedTx' | 'RepaymentOrderNonZeroGain' | 'AddressPlatformMismatch' | 'AlreadyAuthority' | 'DuplicateOffer' | 'DealNotFunded' | 'DealOrderAlreadyFunded' | 'DealOrderAlreadyClosed' | 'DealOrderAlreadyLocked' | 'DealOrderMustBeLocked' | 'DuplicateDealOrder' | 'DealOrderExpired' | 'AskOrderExpired' | 'BidOrderExpired' | 'OfferExpired' | 'AskBidMismatch' | 'SameOwner' | 'InvalidSignature' | 'NotBorrower' | 'MalformedDealOrder' | 'NotLender' | 'UnverifiedTransferPoolFull' | 'RepaymentOrderUnsupported' | 'NotLegacyWalletOwner' | 'LegacyWalletNotFound' | 'LegacyBalanceKeeperMissing' | 'GuidAlreadyUsed' | 'InvalidMaturity' | 'MalformedExternalAddress';
   }
 
-  /** @name PalletDifficultyDifficultyAndTimestamp (121) */
+  /** @name PalletDifficultyDifficultyAndTimestamp (128) */
   export interface PalletDifficultyDifficultyAndTimestamp extends Struct {
     readonly difficulty: U256;
     readonly timestamp: u64;
   }
 
-  /** @name PalletDifficultyError (123) */
+  /** @name PalletDifficultyError (130) */
   export interface PalletDifficultyError extends Enum {
     readonly isZeroTargetTime: boolean;
     readonly isZeroAdjustmentPeriod: boolean;
@@ -824,42 +855,25 @@ declare module '@polkadot/types/lookup' {
     readonly type: 'ZeroTargetTime' | 'ZeroAdjustmentPeriod' | 'NegativeAdjustmentPeriod';
   }
 
-  /** @name SpRuntimeMultiSignature (125) */
-  export interface SpRuntimeMultiSignature extends Enum {
-    readonly isEd25519: boolean;
-    readonly asEd25519: SpCoreEd25519Signature;
-    readonly isSr25519: boolean;
-    readonly asSr25519: SpCoreSr25519Signature;
-    readonly isEcdsa: boolean;
-    readonly asEcdsa: SpCoreEcdsaSignature;
-    readonly type: 'Ed25519' | 'Sr25519' | 'Ecdsa';
-  }
-
-  /** @name SpCoreEd25519Signature (126) */
-  export interface SpCoreEd25519Signature extends U8aFixed {}
-
-  /** @name SpCoreSr25519Signature (128) */
-  export interface SpCoreSr25519Signature extends U8aFixed {}
-
-  /** @name FrameSystemExtensionsCheckSpecVersion (130) */
+  /** @name FrameSystemExtensionsCheckSpecVersion (133) */
   export type FrameSystemExtensionsCheckSpecVersion = Null;
 
-  /** @name FrameSystemExtensionsCheckTxVersion (131) */
+  /** @name FrameSystemExtensionsCheckTxVersion (134) */
   export type FrameSystemExtensionsCheckTxVersion = Null;
 
-  /** @name FrameSystemExtensionsCheckGenesis (132) */
+  /** @name FrameSystemExtensionsCheckGenesis (135) */
   export type FrameSystemExtensionsCheckGenesis = Null;
 
-  /** @name FrameSystemExtensionsCheckNonce (135) */
+  /** @name FrameSystemExtensionsCheckNonce (138) */
   export interface FrameSystemExtensionsCheckNonce extends Compact<u32> {}
 
-  /** @name FrameSystemExtensionsCheckWeight (136) */
+  /** @name FrameSystemExtensionsCheckWeight (139) */
   export type FrameSystemExtensionsCheckWeight = Null;
 
-  /** @name PalletTransactionPaymentChargeTransactionPayment (137) */
+  /** @name PalletTransactionPaymentChargeTransactionPayment (140) */
   export interface PalletTransactionPaymentChargeTransactionPayment extends Compact<u128> {}
 
-  /** @name CreditcoinNodeRuntimeRuntime (138) */
+  /** @name CreditcoinNodeRuntimeRuntime (141) */
   export type CreditcoinNodeRuntimeRuntime = Null;
 
 } // declare module
