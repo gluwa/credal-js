@@ -2,17 +2,19 @@ import { Keyring } from '@polkadot/api';
 import { creditcoinApi } from './connection';
 import { registerAddressAsync } from './extrinsics/register-address';
 import { Wallet } from 'ethers';
-import { addAskOrder, addAskOrderAsync } from './extrinsics/add-ask-order';
+import { addAskOrderAsync } from './extrinsics/add-ask-order';
 import { Guid } from 'js-guid';
+import { addOfferAsync } from './extrinsics/add-offer';
+import { addBidOrderAsync } from './extrinsics/add-bid-order';
 
 const main = async () => {
     const api = await creditcoinApi('ws://localhost:9944');
     const keyring = new Keyring({ type: 'sr25519' });
-    const signer = keyring.addFromUri('//Alice');
+    const lender = keyring.addFromUri('//Alice');
+    const borrower = keyring.addFromUri('//Bob');
 
-    const ethAddress = Wallet.createRandom().address;
     const expBlock = 10000;
-    const lenderAddress = await registerAddressAsync(api, Wallet.createRandom().address, 'Ethereum', signer);
+    const lenderAddress = await registerAddressAsync(api, Wallet.createRandom().address, 'Ethereum', lender);
     console.log(lenderAddress);
 
     const askGuid = Guid.newGuid();
@@ -22,22 +24,25 @@ const main = async () => {
         { amount: BigInt(100), interestRate: 10, maturity: new Date(100) },
         expBlock,
         askGuid,
-        signer,
+        lender,
     );
     console.log(askOrder);
 
-    const borrowerAddress = await registerAddressAsync(api, Wallet.createRandom().address, 'Ethereum', signer);
+    const borrowerAddress = await registerAddressAsync(api, Wallet.createRandom().address, 'Ethereum', borrower);
     console.log(borrowerAddress);
     const bidGuid = Guid.newGuid();
-    const bidOrder = await addAskOrderAsync(
+    const bidOrder = await addBidOrderAsync(
         api,
         borrowerAddress.addressId,
         { amount: BigInt(100), interestRate: 10, maturity: new Date(100) },
         expBlock,
         bidGuid,
-        signer,
+        borrower,
     );
     console.log(bidOrder);
+
+    const offer = await addOfferAsync(api, askOrder.askOrderId, bidOrder.bidOrderId, expBlock, lender);
+    console.log(offer);
 
     await api.disconnect();
 };

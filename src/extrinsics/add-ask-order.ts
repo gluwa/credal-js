@@ -1,5 +1,5 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { AddressId, AskOrder, Blockchain, LoanTerms } from '../model';
+import { AddressId, AskOrder, AskOrderId, Blockchain, LoanTerms } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { handleTransaction, handleTransactionFailed } from './common';
 import { TxCallback } from '../types';
@@ -7,10 +7,9 @@ import { createAskOrder, createCreditcoinLoanTerms } from '../transforms';
 import { GenericEventData } from '@polkadot/types/';
 import { Guid } from 'js-guid';
 import { blake2AsHex } from '@polkadot/util-crypto';
-import { AnyJson } from '@polkadot/types-codec/types';
 
 type AskOrderAdded = {
-    askOrderId: [number, string];
+    askOrderId: AskOrderId;
     askOrder: AskOrder;
 };
 
@@ -40,7 +39,7 @@ const processAskOrderAdded = (api: ApiPromise, result: SubmittableResult): AskOr
     if (!askOrderRegistered) throw new Error('AddAskOrder call returned invalid data');
 
     const getData = (data: GenericEventData) => {
-        const askOrderId = data[0].toJSON() as [number, string];
+        const askOrderId = data[0].toJSON() as AskOrderId;
         const askOrder = createAskOrder(api.createType('PalletCreditcoinAskOrder', data[1]));
         return { askOrderId, askOrder };
     };

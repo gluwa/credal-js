@@ -1,5 +1,5 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { AddressId, BidOrder, Blockchain, LoanTerms } from '../model';
+import { AddressId, BidOrder, BidOrderId, BidOrderId, Blockchain, LoanTerms } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { handleTransaction, handleTransactionFailed } from './common';
 import { TxCallback } from '../types';
@@ -7,10 +7,9 @@ import { createBidOrder, createCreditcoinLoanTerms } from '../transforms';
 import { GenericEventData } from '@polkadot/types/';
 import { Guid } from 'js-guid';
 import { blake2AsHex } from '@polkadot/util-crypto';
-import { AnyJson } from '@polkadot/types-codec/types';
 
 type BidOrderAdded = {
-    bidOrderId: [number, string];
+    bidOrderId: BidOrderId;
     bidOrder: BidOrder;
 };
 
@@ -40,7 +39,7 @@ const processBidOrderAdded = (api: ApiPromise, result: SubmittableResult): BidOr
     if (!bidOrderRegistered) throw new Error('AddBidOrder call returned invalid data');
 
     const getData = (data: GenericEventData) => {
-        const bidOrderId = data[0].toJSON() as [number, string];
+        const bidOrderId = data[0].toJSON() as BidOrderId;
         const bidOrder = createBidOrder(api.createType('PalletCreditcoinBidOrder', data[1]));
         return { bidOrderId, bidOrder };
     };

@@ -4,8 +4,9 @@ import {
     PalletCreditcoinAskOrder,
     PalletCreditcoinBidOrder,
     PalletCreditcoinLoanTerms,
+    PalletCreditcoinOffer,
 } from '@polkadot/types/lookup';
-import { Address, AskOrder, LoanTerms, BidOrder } from './model';
+import { Address, AskOrder, LoanTerms, BidOrder, Offer, AskOrderId, BidOrderId } from './model';
 
 export const createAddress = ({ value, blockchain, owner }: PalletCreditcoinAddress): Address => ({
     accountId: owner.toString(),
@@ -59,4 +60,20 @@ export const createBidOrder = ({
     loanTerms: createLoanTerms(terms),
     borrowerAddressId: borrowerAddressId.toString(),
     borrowerAccountId: borrower.toString(),
+});
+
+export const createOffer = ({
+    blockchain,
+    askId,
+    bidId,
+    expirationBlock,
+    block,
+    lender,
+}: PalletCreditcoinOffer): Offer => ({
+    blockchain: blockchain.type,
+    askOrderId: askId.toJSON() as AskOrderId,
+    bidOrderId: bidId.toJSON() as BidOrderId,
+    expirationBlock: expirationBlock.toNumber(),
+    blockNumber: block.toNumber(),
+    lenderAccountId: lender.toString(),
 });
