@@ -1,15 +1,22 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { Address, Blockchain } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { handleTransaction } from '../utils';
+import { handleTransaction, handleTransactionFailed } from './common';
 import { TxCallback } from '../types';
 import { createAddress } from '../transforms';
 import { GenericEventData } from '@polkadot/types/';
-import { ExtrinsicFailed } from '../types';
+import { u8aConcat, u8aToU8a } from '@polkadot/util';
+import { blake2AsHex } from '@polkadot/util-crypto';
 
-type RegisteredAddress = {
+type AddressRegistered = {
     addressId: string;
     address: Address;
+};
+
+export const createAddressId = (blockchain: Blockchain, externalAddress: string) => {
+    const _blockchain = Buffer.from(blockchain.toString().toLowerCase());
+    const key = u8aConcat(_blockchain, u8aToU8a(externalAddress));
+    return blake2AsHex(key);
 };
 
 export const registerAddress = async (
@@ -25,7 +32,7 @@ export const registerAddress = async (
         .signAndSend(signer, { nonce: -1 }, (result) => handleTransaction(api, unsubscribe, result, onSuccess, onFail));
 };
 
-const processRegisteredAddress = (api: ApiPromise, result: SubmittableResult): RegisteredAddress => {
+const processAddressRegistered = (api: ApiPromise, result: SubmittableResult): AddressRegistered => {
     const { events } = result;
     const addressRegistered = events.find(({ event }) => event.method === 'AddressRegistered');
     if (!addressRegistered) throw new Error('Register Address call returned invalid data');
@@ -39,28 +46,15 @@ const processRegisteredAddress = (api: ApiPromise, result: SubmittableResult): R
     return getData(addressRegistered.event.data);
 };
 
-const registerAddressFailed = (api: ApiPromise, result: SubmittableResult) => {
-    const { dispatchError } = result;
-    if (dispatchError) {
-        if (dispatchError.isModule) {
-            const decoded = api.registry.findMetaError(dispatchError.asModule);
-            const { docs, name, section } = decoded;
-            return Error(`${section}.${name}: ${docs.join(' ')}`);
-        }
-        return new Error(dispatchError.toString());
-    }
-    return new Error('Unknown Error');
-};
-
 export const registerAddressAsync = async (
     api: ApiPromise,
     externalAddress: string,
     blockchain: Blockchain,
     signer: KeyringPair,
 ) => {
-    return new Promise<RegisteredAddress>((resolve, reject) => {
-        const onFail = (result: SubmittableResult) => reject(registerAddressFailed(api, result));
-        const onSuccess = (result: SubmittableResult) => resolve(processRegisteredAddress(api, result));
+    return new Promise<AddressRegistered>((resolve, reject) => {
+        const onFail = (result: SubmittableResult) => reject(handleTransactionFailed(api, result));
+        const onSuccess = (result: SubmittableResult) => resolve(processAddressRegistered(api, result));
         registerAddress(api, externalAddress, blockchain, signer, onSuccess, onFail).catch((reason) => reject(reason));
     });
 };

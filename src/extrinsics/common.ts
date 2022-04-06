@@ -1,5 +1,17 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 
+export const handleTransactionFailed = (api: ApiPromise, result: SubmittableResult) => {
+    const { dispatchError } = result;
+    if (dispatchError) {
+        if (dispatchError.isModule) {
+            const decoded = api.registry.findMetaError(dispatchError.asModule);
+            const { docs, name, section } = decoded;
+            return Error(`${section}.${name}: ${docs.join(' ')}`);
+        }
+        return new Error(dispatchError.toString());
+    }
+    return new Error('Unknown Error');
+};
 export const handleTransaction = (
     api: ApiPromise,
     unsubscribe: () => void,
