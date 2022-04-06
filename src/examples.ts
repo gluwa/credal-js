@@ -11,20 +11,33 @@ const main = async () => {
     const signer = keyring.addFromUri('//Alice');
 
     const ethAddress = Wallet.createRandom().address;
+    const expBlock = 10000;
+    const lenderAddress = await registerAddressAsync(api, Wallet.createRandom().address, 'Ethereum', signer);
+    console.log(lenderAddress);
 
-    const address = await registerAddressAsync(api, ethAddress, 'Ethereum', signer);
-    console.log(address);
-
-    const askGuid = new Guid();
+    const askGuid = Guid.newGuid();
     const askOrder = await addAskOrderAsync(
         api,
-        address.addressId,
+        lenderAddress.addressId,
         { amount: BigInt(100), interestRate: 10, maturity: new Date(100) },
-        100,
+        expBlock,
         askGuid,
         signer,
     );
     console.log(askOrder);
+
+    const borrowerAddress = await registerAddressAsync(api, Wallet.createRandom().address, 'Ethereum', signer);
+    console.log(borrowerAddress);
+    const bidGuid = Guid.newGuid();
+    const bidOrder = await addAskOrderAsync(
+        api,
+        borrowerAddress.addressId,
+        { amount: BigInt(100), interestRate: 10, maturity: new Date(100) },
+        expBlock,
+        bidGuid,
+        signer,
+    );
+    console.log(bidOrder);
 
     await api.disconnect();
 };

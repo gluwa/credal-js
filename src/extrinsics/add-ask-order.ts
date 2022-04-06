@@ -14,7 +14,7 @@ type AskOrderAdded = {
     askOrder: AskOrder;
 };
 
-export const createAskOrBidOrderId = (expirationBlock: number, guid: Guid) => {
+export const createAskOrderId = (expirationBlock: number, guid: Guid) => {
     const key = [expirationBlock, blake2AsHex(guid.toString())];
     return key;
 };
