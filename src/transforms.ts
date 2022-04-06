@@ -1,6 +1,11 @@
 import { ApiPromise } from '@polkadot/api';
-import { PalletCreditcoinAddress, PalletCreditcoinAskOrder, PalletCreditcoinLoanTerms } from '@polkadot/types/lookup';
-import { Address, AskOrder, LoanTerms, Blockchain } from './model';
+import {
+    PalletCreditcoinAddress,
+    PalletCreditcoinAskOrder,
+    PalletCreditcoinBidOrder,
+    PalletCreditcoinLoanTerms,
+} from '@polkadot/types/lookup';
+import { Address, AskOrder, LoanTerms, BidOrder } from './model';
 
 export const createAddress = ({ value, blockchain, owner }: PalletCreditcoinAddress): Address => ({
     accountId: owner.toString(),
@@ -38,4 +43,20 @@ export const createAskOrder = ({
     loanTerms: createLoanTerms(terms),
     lenderAddressId: lenderAddressId.toString(),
     lenderAccountId: lender.toString(),
+});
+
+export const createBidOrder = ({
+    blockchain,
+    terms,
+    borrowerAddressId,
+    expirationBlock,
+    block,
+    borrower,
+}: PalletCreditcoinBidOrder): BidOrder => ({
+    blockchain: blockchain.type,
+    blockNumber: block.toNumber(),
+    expirationBlock: expirationBlock.toNumber(),
+    loanTerms: createLoanTerms(terms),
+    borrowerAddressId: borrowerAddressId.toString(),
+    borrowerAccountId: borrower.toString(),
 });
