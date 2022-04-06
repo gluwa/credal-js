@@ -18,6 +18,10 @@ export type LoanTerms = {
     maturity: Date;
 };
 
+type TupleId = [number, string];
+export type AskOrderId = TupleId;
+export type BidOrderId = TupleId;
+
 type AskOrBidOrderBase = {
     loanTerms: LoanTerms;
     expirationBlock: number;
@@ -33,4 +37,15 @@ export type AskOrder = AskOrBidOrderBase & {
 export type BidOrder = AskOrBidOrderBase & {
     borrowerAddressId: AddressId;
     borrowerAccountId: AccountId;
+};
+
+export type OfferId = TupleId;
+
+export type Offer = {
+    blockchain: Blockchain;
+    askOrderId: AskOrderId;
+    bidOrderId: BidOrderId;
+    expirationBlock: number;
+    blockNumber: number;
+    lenderAccountId: AccountId;
 };

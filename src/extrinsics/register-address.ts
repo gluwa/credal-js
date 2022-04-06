@@ -14,8 +14,8 @@ type AddressRegistered = {
 };
 
 export const createAddressId = (blockchain: Blockchain, externalAddress: string) => {
-    const _blockchain = Buffer.from(blockchain.toString().toLowerCase());
-    const key = u8aConcat(_blockchain, u8aToU8a(externalAddress));
+    const blockchainBytes = Buffer.from(blockchain.toString().toLowerCase());
+    const key = u8aConcat(blockchainBytes, u8aToU8a(externalAddress));
     return blake2AsHex(key);
 };
 
