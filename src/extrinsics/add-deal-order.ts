@@ -1,15 +1,17 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { GenericEventData } from '@polkadot/types';
 import { blake2AsHex } from '@polkadot/util-crypto';
-import { DealOrderId, OfferId } from '../model';
+import { DealOrder, DealOrderId, OfferId } from '../model';
 import { createDealOrder } from '../transforms';
 import { TxCallback } from '../types';
 import { handleTransaction, handleTransactionFailed } from './common';
 import { KeyringPair } from '@polkadot/keyring/types';
 
-type DealOrderAdded = {
+export type DealOrderAdded = {
     dealOrderId: DealOrderId;
+    dealOrder: DealOrder;
 };
+
 export const createDealOrderId = (expirationBlock: number, offerId: OfferId) => [
     expirationBlock,
     blake2AsHex(offerId[1]),
@@ -19,17 +21,19 @@ export const addDealOrder = async (
     api: ApiPromise,
     offerId: OfferId,
     expirationBlock: number,
-    signer: KeyringPair,
+    borrower: KeyringPair,
     onSuccess: TxCallback,
     onFail: TxCallback,
 ) => {
     const _offerId = api.createType('PalletCreditcoinOfferId', offerId);
     const unsubscribe: () => void = await api.tx.creditcoin
         .addDealOrder(_offerId, expirationBlock)
-        .signAndSend(signer, { nonce: -1 }, (result) => handleTransaction(api, unsubscribe, result, onSuccess, onFail));
+        .signAndSend(borrower, { nonce: -1 }, (result) =>
+            handleTransaction(api, unsubscribe, result, onSuccess, onFail),
+        );
 };
 
-const processDealOrderAdded = (api: ApiPromise, result: SubmittableResult): DealOrderAdded => {
+export const processDealOrderAdded = (api: ApiPromise, result: SubmittableResult): DealOrderAdded => {
     const { events } = result;
     const dealOrderAdded = events.find(({ event }) => event.method === 'DealOrderAdded');
     if (!dealOrderAdded) throw new Error('DealOrder call returned invalid data');

@@ -8,7 +8,7 @@ import { GenericEventData } from '@polkadot/types/';
 import { Guid } from 'js-guid';
 import { blake2AsHex } from '@polkadot/util-crypto';
 
-type AskOrderAdded = {
+export type AskOrderAdded = {
     askOrderId: AskOrderId;
     askOrder: AskOrder;
 };
@@ -31,7 +31,7 @@ export const addAskOrder = async (
         .signAndSend(signer, { nonce: -1 }, (result) => handleTransaction(api, unsubscribe, result, onSuccess, onFail));
 };
 
-const processAskOrderAdded = (api: ApiPromise, result: SubmittableResult): AskOrderAdded => {
+export const processAskOrderAdded = (api: ApiPromise, result: SubmittableResult): AskOrderAdded => {
     const { events } = result;
     const askOrderRegistered = events.find(({ event }) => event.method === 'AskOrderAdded');
     if (!askOrderRegistered) throw new Error('AddAskOrder call returned invalid data');
