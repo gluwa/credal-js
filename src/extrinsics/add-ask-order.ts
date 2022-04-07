@@ -1,5 +1,5 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { AddressId, AskOrder, AskOrderId, Blockchain, LoanTerms } from '../model';
+import { AddressId, AskOrder, AskOrderId, LoanTerms } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { handleTransaction, handleTransactionFailed } from './common';
 import { TxCallback } from '../types';
@@ -13,10 +13,8 @@ type AskOrderAdded = {
     askOrder: AskOrder;
 };
 
-export const createAskOrderId = (expirationBlock: number, guid: Guid) => {
-    const key = [expirationBlock, blake2AsHex(guid.toString())];
-    return key;
-};
+export const createAskOrderId = (expirationBlock: number, guid: Guid): AskOrderId =>
+    [expirationBlock, blake2AsHex(guid.toString())] as AskOrderId;
 
 export const addAskOrder = async (
     api: ApiPromise,

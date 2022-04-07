@@ -13,10 +13,8 @@ type BidOrderAdded = {
     bidOrder: BidOrder;
 };
 
-export const createBidOrderId = (expirationBlock: number, guid: Guid) => {
-    const key = [expirationBlock, blake2AsHex(guid.toString())];
-    return key;
-};
+export const createBidOrderId = (expirationBlock: number, guid: Guid): BidOrderId =>
+    [expirationBlock, blake2AsHex(guid.toString())] as BidOrderId;
 
 export const addBidOrder = async (
     api: ApiPromise,

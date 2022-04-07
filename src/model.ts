@@ -49,3 +49,18 @@ export type Offer = {
     blockNumber: number;
     lenderAccountId: AccountId;
 };
+
+export type DealOrderId = TupleId;
+
+export type DealOrder = {
+    offerId: OfferId;
+    lenderAddressId: AddressId;
+    borrowerAddressId: AddressId;
+    loanTerms: LoanTerms;
+    expirationBlock: number;
+    timestamp: Date;
+    fundingTransferId?: string;
+    repaymentTransferId?: string;
+    lock?: string;
+    borrower: AccountId;
+};

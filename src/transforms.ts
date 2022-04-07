@@ -3,10 +3,11 @@ import {
     PalletCreditcoinAddress,
     PalletCreditcoinAskOrder,
     PalletCreditcoinBidOrder,
+    PalletCreditcoinDealOrder,
     PalletCreditcoinLoanTerms,
     PalletCreditcoinOffer,
 } from '@polkadot/types/lookup';
-import { Address, AskOrder, LoanTerms, BidOrder, Offer, AskOrderId, BidOrderId } from './model';
+import { Address, AskOrder, LoanTerms, BidOrder, Offer, AskOrderId, BidOrderId, DealOrder, OfferId } from './model';
 
 export const createAddress = ({ value, blockchain, owner }: PalletCreditcoinAddress): Address => ({
     accountId: owner.toString(),
@@ -77,3 +78,30 @@ export const createOffer = ({
     blockNumber: block.toNumber(),
     lenderAccountId: lender.toString(),
 });
+
+export const createDealOrder = (dealOrder: PalletCreditcoinDealOrder): DealOrder => {
+    const {
+        offerId,
+        lenderAddressId,
+        borrowerAddressId,
+        terms,
+        expirationBlock,
+        timestamp,
+        fundingTransferId,
+        repaymentTransferId,
+        lock,
+        borrower,
+    } = dealOrder;
+    return {
+        offerId: offerId.toJSON() as OfferId,
+        lenderAddressId: lenderAddressId.toString(),
+        borrowerAddressId: borrowerAddressId.toString(),
+        loanTerms: createLoanTerms(terms),
+        expirationBlock: expirationBlock.toNumber(),
+        timestamp: new Date(timestamp.toNumber()),
+        fundingTransferId: fundingTransferId.unwrapOr(undefined)?.toString(),
+        repaymentTransferId: repaymentTransferId.unwrapOr(undefined)?.toString(),
+        lock: lock.unwrapOr(undefined)?.toString(),
+        borrower: borrower.toString(),
+    };
+};

@@ -13,7 +13,7 @@ type OfferAdded = {
     offer: Offer;
 };
 
-export const createOfferId = (expirationBlock: number, askOrderId: AskOrderId, bidOrderId: BidOrderId) => {
+export const createOfferId = (expirationBlock: number, askOrderId: AskOrderId, bidOrderId: BidOrderId): OfferId => {
     const key = blake2AsHex(u8aConcat(askOrderId[1], bidOrderId[1]));
     return [expirationBlock, key];
 };

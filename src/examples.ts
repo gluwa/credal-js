@@ -2,10 +2,11 @@ import { Keyring } from '@polkadot/api';
 import { creditcoinApi } from './connection';
 import { registerAddressAsync } from './extrinsics/register-address';
 import { Wallet } from 'ethers';
-import { addAskOrderAsync } from './extrinsics/add-ask-order';
+import { addAskOrderAsync, createAskOrderId } from './extrinsics/add-ask-order';
 import { Guid } from 'js-guid';
-import { addOfferAsync } from './extrinsics/add-offer';
-import { addBidOrderAsync } from './extrinsics/add-bid-order';
+import { addOfferAsync, createOfferId } from './extrinsics/add-offer';
+import { addBidOrderAsync, createBidOrderId } from './extrinsics/add-bid-order';
+import { addDealOrderAsync, createDealOrderId } from './extrinsics/add-deal-order';
 
 const main = async () => {
     const api = await creditcoinApi('ws://localhost:9944');
@@ -27,6 +28,7 @@ const main = async () => {
         lender,
     );
     console.log(askOrder);
+    const askOrderId = createAskOrderId(expBlock, askGuid);
 
     const borrowerAddress = await registerAddressAsync(api, Wallet.createRandom().address, 'Ethereum', borrower);
     console.log(borrowerAddress);
@@ -39,10 +41,18 @@ const main = async () => {
         bidGuid,
         borrower,
     );
+    const bidOrderId = createBidOrderId(expBlock, bidGuid);
     console.log(bidOrder);
 
-    const offer = await addOfferAsync(api, askOrder.askOrderId, bidOrder.bidOrderId, expBlock, lender);
+    const offer = await addOfferAsync(api, askOrderId, bidOrderId, expBlock, lender);
     console.log(offer);
+    const offerId = createOfferId(expBlock, askOrderId, bidOrderId);
+    console.log(offerId);
+
+    const dealOrderId = createDealOrderId(expBlock, offerId);
+    const dealOrder = await addDealOrderAsync(api, offerId, expBlock, borrower);
+    console.log(dealOrder);
+    console.log(dealOrderId);
 
     await api.disconnect();
 };
