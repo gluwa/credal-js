@@ -27,10 +27,10 @@ export const addOffer = async (
     onSuccess: TxCallback,
     onFail: TxCallback,
 ) => {
-    const _askOrderId = api.createType('PalletCreditcoinAskOrderId', askOrderId);
-    const _bidOrderId = api.createType('PalletCreditcoinBidOrderId', bidOrderId);
+    const ccAskOrderId = api.createType('PalletCreditcoinAskOrderId', askOrderId);
+    const ccBidOrderId = api.createType('PalletCreditcoinBidOrderId', bidOrderId);
     const unsubscribe: () => void = await api.tx.creditcoin
-        .addOffer(_askOrderId, _bidOrderId, expirationBlock)
+        .addOffer(ccAskOrderId, ccBidOrderId, expirationBlock)
         .signAndSend(signer, { nonce: -1 }, (result) => handleTransaction(api, unsubscribe, result, onSuccess, onFail));
 };
 
@@ -58,6 +58,8 @@ export const addOfferAsync = async (
     return new Promise<OfferAdded>((resolve, reject) => {
         const onFail = (result: SubmittableResult) => reject(handleTransactionFailed(api, result));
         const onSuccess = (result: SubmittableResult) => resolve(processOfferAdded(api, result));
-        addOffer(api, askOrderId, bidOrderId, expirationBlock, signer, onSuccess, onFail);
+        addOffer(api, askOrderId, bidOrderId, expirationBlock, signer, onSuccess, onFail).catch((reason) =>
+            reject(reason),
+        );
     });
 };

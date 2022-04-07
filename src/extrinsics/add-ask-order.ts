@@ -56,6 +56,8 @@ export const addAskOrderAsync = async (
     return new Promise<AskOrderAdded>((resolve, reject) => {
         const onFail = (result: SubmittableResult) => reject(handleTransactionFailed(api, result));
         const onSuccess = (result: SubmittableResult) => resolve(processAskOrderAdded(api, result));
-        addAskOrder(api, lenderAddressId, loanTerms, expirationBlock, guid, signer, onSuccess, onFail);
+        addAskOrder(api, lenderAddressId, loanTerms, expirationBlock, guid, signer, onSuccess, onFail).catch((reason) =>
+            reject(reason),
+        );
     });
 };

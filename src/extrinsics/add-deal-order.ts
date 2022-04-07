@@ -25,9 +25,9 @@ export const addDealOrder = async (
     onSuccess: TxCallback,
     onFail: TxCallback,
 ) => {
-    const _offerId = api.createType('PalletCreditcoinOfferId', offerId);
+    const ccOfferId = api.createType('PalletCreditcoinOfferId', offerId);
     const unsubscribe: () => void = await api.tx.creditcoin
-        .addDealOrder(_offerId, expirationBlock)
+        .addDealOrder(ccOfferId, expirationBlock)
         .signAndSend(borrower, { nonce: -1 }, (result) =>
             handleTransaction(api, unsubscribe, result, onSuccess, onFail),
         );
@@ -51,6 +51,6 @@ export const addDealOrderAsync = (api: ApiPromise, offerId: OfferId, expirationB
     return new Promise<DealOrderAdded>((resolve, reject) => {
         const onFail = (result: SubmittableResult) => reject(handleTransactionFailed(api, result));
         const onSuccess = (result: SubmittableResult) => resolve(processDealOrderAdded(api, result));
-        addDealOrder(api, offerId, expirationBlock, signer, onSuccess, onFail);
+        addDealOrder(api, offerId, expirationBlock, signer, onSuccess, onFail).catch((reason) => reject(reason));
     });
 };

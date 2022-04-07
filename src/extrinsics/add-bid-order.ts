@@ -56,6 +56,8 @@ export const addBidOrderAsync = async (
     return new Promise<BidOrderAdded>((resolve, reject) => {
         const onFail = (result: SubmittableResult) => reject(handleTransactionFailed(api, result));
         const onSuccess = (result: SubmittableResult) => resolve(processBidOrderAdded(api, result));
-        addBidOrder(api, borrowerAddressId, loanTerms, expirationBlock, guid, signer, onSuccess, onFail);
+        addBidOrder(api, borrowerAddressId, loanTerms, expirationBlock, guid, signer, onSuccess, onFail).catch(
+            (reason) => reject(reason),
+        );
     });
 };

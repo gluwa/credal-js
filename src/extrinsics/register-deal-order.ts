@@ -2,7 +2,7 @@ import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { u8aConcat } from '@polkadot/util';
 
 import { AddressId, LoanTerms } from '../model';
-import { createCreditcoinLoanTerms, createDealOrder } from '../transforms';
+import { createCreditcoinLoanTerms } from '../transforms';
 import { TxCallback } from '../types';
 import { handleTransaction, handleTransactionFailed } from './common';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -27,12 +27,12 @@ export const signLoanParams = (
     bidGuid: Guid,
     loanTerms: LoanTerms,
 ) => {
-    const _loanTerms = createCreditcoinLoanTerms(api, loanTerms);
+    const ccLoanTerms = createCreditcoinLoanTerms(api, loanTerms);
     const bytesParams = u8aConcat(
         api.createType('u32', expBlock).toU8a(),
         api.createType('String', askGuid.toString()).toU8a(),
         api.createType('String', bidGuid.toString()).toU8a(),
-        _loanTerms.toU8a(),
+        ccLoanTerms.toU8a(),
     );
 
     return signer.sign(bytesParams);
@@ -52,17 +52,17 @@ export const registerDealOrder = async (
     onSuccess: TxCallback,
     onFail: TxCallback,
 ) => {
-    const _loanTerms = createCreditcoinLoanTerms(api, loanTerms);
+    const ccLoanTerms = createCreditcoinLoanTerms(api, loanTerms);
     const unsubscribe: () => void = await api.tx.creditcoin
         .registerDealOrder(
             lenderAddressId,
             borrowerAddressId,
-            _loanTerms,
+            ccLoanTerms,
             expBlock,
             askGuid.toString(),
             bidGuid.toString(),
-            { Sr25519: borrowerKey },
-            { Sr25519: signedParams },
+            { Sr25519: borrowerKey }, // eslint-disable-line  @typescript-eslint/naming-convention
+            { Sr25519: signedParams }, // eslint-disable-line  @typescript-eslint/naming-convention
         )
         .signAndSend(lender, { nonce: -1 }, (result) => handleTransaction(api, unsubscribe, result, onSuccess, onFail));
 };
