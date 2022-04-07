@@ -1,5 +1,5 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { AddressId, BidOrder, BidOrderId, BidOrderId, Blockchain, LoanTerms } from '../model';
+import { AddressId, BidOrder, BidOrderId, LoanTerms } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { handleTransaction, handleTransactionFailed } from './common';
 import { TxCallback } from '../types';

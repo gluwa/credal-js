@@ -14,9 +14,7 @@ type OfferAdded = {
 };
 
 export const createOfferId = (expirationBlock: number, askOrderId: AskOrderId, bidOrderId: BidOrderId) => {
-    const askOrderIdBytes = Buffer.from(askOrderId[1]);
-    const bidOrderIdBytes = Buffer.from(bidOrderId[1]);
-    const key = blake2AsHex(u8aConcat(askOrderIdBytes, bidOrderIdBytes));
+    const key = blake2AsHex(u8aConcat(askOrderId[1], bidOrderId[1]));
     return [expirationBlock, key];
 };
 
