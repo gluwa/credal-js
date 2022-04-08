@@ -8,7 +8,7 @@ import { GenericEventData } from '@polkadot/types/';
 import { u8aConcat, u8aToU8a } from '@polkadot/util';
 import { blake2AsHex } from '@polkadot/util-crypto';
 
-type AddressRegistered = {
+export type AddressRegistered = {
     addressId: string;
     address: Address;
 };
