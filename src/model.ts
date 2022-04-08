@@ -75,3 +75,24 @@ export type DealOrder = {
     lock?: string;
     borrower: AccountId;
 };
+
+export type TransferId = string;
+
+export type Erc20 = { kind: 'Erc20'; contractAddress: ExternalAddress };
+export type Ethless = { kind: 'Ethless'; contractAddress: ExternalAddress };
+export type Other = { kind: 'Other'; value: ExternalAddress };
+export type Native = { kind: 'Native' };
+export type TransferKind = Erc20 | Ethless | Native | Other;
+
+export type Transfer = {
+    blockchain: Blockchain;
+    kind: TransferKind;
+    from: AddressId;
+    to: AddressId;
+    orderId: DealOrderId;
+    amount: BigInt;
+    txHash: string;
+    blockNumber: number;
+    processed: boolean;
+    accountId: AccountId;
+};
