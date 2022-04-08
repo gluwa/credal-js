@@ -32,6 +32,7 @@
     },
     "dependencies": {
         "@polkadot/api": "^7.15.1",
+        "dotenv": "^16.0.0",
         "eslint-config-prettier": "^8.5.0",
         "js-guid": "^1.0.0"
     }
