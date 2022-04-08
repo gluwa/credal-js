@@ -12,9 +12,9 @@ const signTransfer = async (
     tokenAddress: string,
     from: Signer,
     to: string,
-    amount: number,
+    amount: BigInt,
     fee: number,
-    nonce: number,
+    nonce: BigInt,
 ) => {
     const fromAddress = await from.getAddress();
     const hash = ethers.utils.solidityKeccak256(
@@ -42,9 +42,9 @@ const ethlessTransfer = async (
     token: TestToken,
     fromSigner: Signer,
     to: string,
-    amount: number,
+    amount: BigInt,
     fee: number,
-    nonce: number,
+    nonce: BigInt,
 ) => {
     const chainId = await token.chainID();
     const fromAddress = await fromSigner.getAddress();
@@ -52,12 +52,19 @@ const ethlessTransfer = async (
 
     const receipt = await token
         .connect(signer)
-        ['transfer(address,address,uint256,uint256,uint256,bytes)'](fromAddress, to, amount, fee, nonce, signature)
+        ['transfer(address,address,uint256,uint256,uint256,bytes)'](
+            fromAddress,
+            to,
+            amount.valueOf(),
+            fee,
+            nonce.valueOf(),
+            signature,
+        )
         .then((tx) => tx.wait());
     return receipt;
 };
 
-export const setupEthEnv = async (lender: Wallet, borrower: string) => {
+export const lendOnEth = async (lender: Wallet, borrower: string, dealOrderId: string, amount: BigInt) => {
     const provider = new JsonRpcProvider('http://localhost:8545');
 
     const minter = new Wallet(process.env.PK1 || '', provider);
@@ -66,14 +73,17 @@ export const setupEthEnv = async (lender: Wallet, borrower: string) => {
     const fundReceipt = await fundAccount(testToken, minter, lender.address, 1_000_000);
     console.log(fundReceipt);
 
-    const nonce = Date.now();
-    const transferReceipt = await ethlessTransfer(minter, 3, testToken, lender, borrower, 1_000, 1, nonce);
+    const nonce = BigInt(dealOrderId);
+    console.log('nonce: ', nonce);
+
+    const transferReceipt = await ethlessTransfer(minter, 3, testToken, lender, borrower, amount, 1, nonce);
 
     console.log(transferReceipt);
+    return [testToken.address, transferReceipt.transactionHash];
 };
 
 const main = async () => {
-    setupEthEnv(Wallet.createRandom(), Wallet.createRandom().address);
+    lendOnEth(Wallet.createRandom(), Wallet.createRandom().address, '0x552345', BigInt(1000));
 };
 
 main().catch(console.error);

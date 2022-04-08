@@ -8,6 +8,7 @@ import { addOfferAsync, createOfferId } from './extrinsics/add-offer';
 import { addBidOrderAsync, createBidOrderId } from './extrinsics/add-bid-order';
 import { addDealOrderAsync, createDealOrderId } from './extrinsics/add-deal-order';
 import { registerDealOrderAsync, signLoanParams } from './extrinsics/register-deal-order';
+import { lendOnEth } from './ethereum';
 
 const main = async () => {
     const api = await creditcoinApi('ws://127.0.0.1:9944');
@@ -32,7 +33,8 @@ const main = async () => {
         },
     };
 
-    const lenderAddress = await registerAddressAsync(api, Wallet.createRandom().address, 'Ethereum', lender);
+    const lenderWallet = Wallet.createRandom();
+    const lenderAddress = await registerAddressAsync(api, lenderWallet.address, 'Ethereum', lender);
     console.log(lenderAddress);
 
     const askGuid = Guid.newGuid();
@@ -43,20 +45,20 @@ const main = async () => {
     const borrowerAddress = await registerAddressAsync(api, Wallet.createRandom().address, 'Ethereum', borrower);
     console.log(borrowerAddress);
 
-    const bidGuid = Guid.newGuid();
-    const bidOrder = await addBidOrderAsync(api, borrowerAddress.addressId, loanTerms, expBlock, bidGuid, borrower);
-    const bidOrderId = createBidOrderId(expBlock, bidGuid);
-    console.log(bidOrder);
+    // const bidGuid = Guid.newGuid();
+    // const bidOrder = await addBidOrderAsync(api, borrowerAddress.addressId, loanTerms, expBlock, bidGuid, borrower);
+    // const bidOrderId = createBidOrderId(expBlock, bidGuid);
+    // console.log(bidOrder);
 
-    const offer = await addOfferAsync(api, askOrderId, bidOrderId, expBlock, lender);
-    console.log(offer);
-    const offerId = createOfferId(expBlock, askOrderId, bidOrderId);
-    console.log(offerId);
+    // const offer = await addOfferAsync(api, askOrderId, bidOrderId, expBlock, lender);
+    // console.log(offer);
+    // const offerId = createOfferId(expBlock, askOrderId, bidOrderId);
+    // console.log(offerId);
 
-    const dealOrderId = createDealOrderId(expBlock, offerId);
-    const dealOrder = await addDealOrderAsync(api, offerId, expBlock, borrower);
-    console.log(dealOrder);
-    console.log(dealOrderId);
+    // const dealOrderId = createDealOrderId(expBlock, offerId);
+    // const dealOrder = await addDealOrderAsync(api, offerId, expBlock, borrower);
+    // console.log(dealOrder);
+    // console.log(dealOrderId);
 
     const askGuid2 = Guid.newGuid();
     const bidGuid2 = Guid.newGuid();
@@ -74,6 +76,15 @@ const main = async () => {
         lender,
     );
     console.log(registerDealOrder);
+
+    const [tokenAddress, txHash] = await lendOnEth(
+        lenderWallet,
+        borrowerWallet.address,
+        registerDealOrder.dealOrder.dealOrderId[1],
+        loanTerms.amount,
+    );
+    console.log('token address ', tokenAddress, 'tx hash ', txHash);
+
     await api.disconnect();
 };
 
