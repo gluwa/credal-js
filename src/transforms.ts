@@ -8,6 +8,8 @@ import {
     PalletCreditcoinLoanTermsInterestRate,
     PalletCreditcoinLoanTermsDuration,
     PalletCreditcoinOffer,
+    PalletCreditcoinTransfer,
+    PalletCreditcoinTransferKind,
 } from '@polkadot/types/lookup';
 import {
     Address,
@@ -21,6 +23,9 @@ import {
     OfferId,
     InterestRate,
     Duration,
+    DealOrderId,
+    Transfer,
+    TransferKind,
 } from './model';
 
 export const createAddress = ({ value, blockchain, owner }: PalletCreditcoinAddress): Address => ({
@@ -132,5 +137,54 @@ export const createDealOrder = (dealOrder: PalletCreditcoinDealOrder): DealOrder
         repaymentTransferId: repaymentTransferId.unwrapOr(undefined)?.toString(),
         lock: lock.unwrapOr(undefined)?.toString(),
         borrower: borrower.toString(),
+    };
+};
+
+export const createCreditcoinTransferKind = (
+    api: ApiPromise,
+    transferKind: TransferKind,
+): PalletCreditcoinTransferKind => {
+    const toType = (): unknown => {
+        switch (transferKind.kind) {
+            case 'Erc20':
+                return { Erc20: transferKind.contractAddress }; // eslint-disable-line  @typescript-eslint/naming-convention
+            case 'Ethless':
+                return { Ethless: transferKind.contractAddress }; // eslint-disable-line  @typescript-eslint/naming-convention
+            case 'Native':
+                return 'Native';
+            case 'Other':
+                return { Other: transferKind.value }; // eslint-disable-line  @typescript-eslint/naming-convention
+        }
+    };
+
+    return api.createType('PalletCreditcoinTransferKind', toType());
+};
+
+export const createTransferKind = (transferKind: PalletCreditcoinTransferKind): TransferKind => {
+    switch (transferKind.type) {
+        case 'Erc20':
+            return { kind: 'Erc20', contractAddress: transferKind.asErc20.toString() };
+        case 'Ethless':
+            return { kind: 'Ethless', contractAddress: transferKind.asEthless.toString() };
+        case 'Native':
+            return { kind: 'Native' };
+        default:
+            return { kind: 'Other', value: transferKind.asOther.toString() };
+    }
+};
+
+export const createTransfer = (transfer: PalletCreditcoinTransfer): Transfer => {
+    const { blockchain, kind, from, to, orderId, amount, tx, block, processed, sighash } = transfer;
+    return {
+        blockchain: blockchain.type,
+        kind: createTransferKind(kind),
+        from: from.toString(),
+        to: to.toString(),
+        orderId: (orderId.isDeal ? orderId.asDeal.toJSON : orderId.asRepayment.toJSON()) as DealOrderId,
+        amount: amount.toBigInt(),
+        txHash: tx.toString(),
+        blockNumber: block.toNumber(),
+        processed: processed.isTrue,
+        accountId: sighash.toString(),
     };
 };
