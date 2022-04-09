@@ -9,11 +9,14 @@ import { addBidOrderAsync, createBidOrderId } from './extrinsics/add-bid-order';
 import { addDealOrderAsync, createDealOrderId } from './extrinsics/add-deal-order';
 import { registerDealOrderAsync, signLoanParams } from './extrinsics/register-deal-order';
 import { lendOnEth } from './ethereum';
+import { registerTransferAsync } from './extrinsics/register-transfer';
+import { TransferKind } from './model';
 
 const main = async () => {
     const api = await creditcoinApi('ws://127.0.0.1:9944');
     const keyring = new Keyring({ type: 'sr25519' });
     const lender = keyring.addFromUri('//Alice');
+    console.log(lender.address);
     const borrower = keyring.addFromUri('//Bob');
 
     const expBlock = 10000;
@@ -84,7 +87,15 @@ const main = async () => {
         loanTerms.amount,
     );
     console.log('token address ', tokenAddress, 'tx hash ', txHash);
-
+    const transferKind: TransferKind = { kind: 'Ethless', contractAddress: tokenAddress };
+    const transfer = await registerTransferAsync(
+        api,
+        transferKind,
+        registerDealOrder.dealOrder.dealOrderId,
+        txHash,
+        lender,
+    );
+    console.log(transfer);
     await api.disconnect();
 };
 
