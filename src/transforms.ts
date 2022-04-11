@@ -5,9 +5,23 @@ import {
     PalletCreditcoinBidOrder,
     PalletCreditcoinDealOrder,
     PalletCreditcoinLoanTerms,
+    PalletCreditcoinLoanTermsInterestRate,
+    PalletCreditcoinLoanTermsDuration,
     PalletCreditcoinOffer,
 } from '@polkadot/types/lookup';
-import { Address, AskOrder, LoanTerms, BidOrder, Offer, AskOrderId, BidOrderId, DealOrder, OfferId } from './model';
+import {
+    Address,
+    AskOrder,
+    LoanTerms,
+    BidOrder,
+    Offer,
+    AskOrderId,
+    BidOrderId,
+    DealOrder,
+    OfferId,
+    InterestRate,
+    Duration,
+} from './model';
 
 export const createAddress = ({ value, blockchain, owner }: PalletCreditcoinAddress): Address => ({
     accountId: owner.toString(),
@@ -15,20 +29,35 @@ export const createAddress = ({ value, blockchain, owner }: PalletCreditcoinAddr
     externalAddress: value.toString(),
 });
 
-export const createLoanTerms = ({ amount, interestRate, maturity }: PalletCreditcoinLoanTerms): LoanTerms => ({
+export const createDuration = ({ secs, nanos }: PalletCreditcoinLoanTermsDuration): Duration => ({
+    secs: secs.toNumber(),
+    nanos: nanos.toNumber(),
+});
+
+export const createInterestRate = ({
+    ratePerPeriod,
+    decimals,
+    period,
+}: PalletCreditcoinLoanTermsInterestRate): InterestRate => ({
+    ratePerPeriod: ratePerPeriod.toNumber(),
+    decimals: decimals.toNumber(),
+    period: createDuration(period),
+});
+
+export const createLoanTerms = ({ amount, interestRate, termLength }: PalletCreditcoinLoanTerms): LoanTerms => ({
     amount: amount.toBigInt(),
-    interestRate: interestRate.toNumber(),
-    maturity: new Date(maturity.toNumber()),
+    interestRate: createInterestRate(interestRate),
+    termLength: createDuration(termLength),
 });
 
 export const createCreditcoinLoanTerms = (
     api: ApiPromise,
-    { amount, interestRate, maturity }: LoanTerms,
+    { amount, interestRate, termLength }: LoanTerms,
 ): PalletCreditcoinLoanTerms =>
     api.createType('PalletCreditcoinLoanTerms', {
         amount,
         interestRate,
-        maturity: Math.floor(maturity.getTime()),
+        termLength,
     });
 
 export const createAskOrder = ({

@@ -12,10 +12,21 @@ export type Address = {
     externalAddress: ExternalAddress;
 };
 
+export type Duration = {
+    secs: number;
+    nanos: number;
+};
+
+export type InterestRate = {
+    ratePerPeriod: number;
+    decimals: number;
+    period: Duration;
+};
+
 export type LoanTerms = {
     amount: BigInt;
-    interestRate: number;
-    maturity: Date;
+    interestRate: InterestRate;
+    termLength: Duration;
 };
 
 type TupleId = [number, string];

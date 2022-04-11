@@ -13,8 +13,9 @@
         "build:types": "yarn generate:defs && yarn generate:meta",
         "generate:defs": "ts-node --skip-project node_modules/.bin/polkadot-types-from-defs --package credal-js/interfaces --input ./src/interfaces --endpoint ./creditcoin.json",
         "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package credal-js/interfaces  --endpoint ./creditcoin.json --output ./src/interfaces",
-        "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+        "format": "prettier --write \"src/**/*.ts\"",
         "lint": "eslint -c .eslintrc.js --ext .ts ./src",
+        "typecheck": "tsc --noEmit",
         "prepare": "npm run build"
     },
     "devDependencies": {

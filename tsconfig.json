@@ -8,6 +8,7 @@
         "skipLibCheck": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
+        "baseUrl": ".",
         "paths": {
             "credal-js/*": ["./src/*"],
             "@polkadot/api/augment": ["./src/interfaces/augment-api.ts"],
