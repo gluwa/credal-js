@@ -12,7 +12,7 @@ import { OfferAdded, processOfferAdded } from './add-offer';
 import { DealOrderAdded, processDealOrderAdded } from './add-deal-order';
 import { Guid } from 'js-guid';
 
-type DealOrderRegistered = {
+export type DealOrderRegistered = {
     askOrder: AskOrderAdded;
     bidOrder: BidOrderAdded;
     offer: OfferAdded;
