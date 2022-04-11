@@ -18,7 +18,7 @@
         "prepare": "npm run build"
     },
     "devDependencies": {
-        "@polkadot/typegen": "^7.15.1",
+        "@polkadot/typegen": "^8.0.1",
         "@typescript-eslint/eslint-plugin": "^5.18.0",
         "@typescript-eslint/parser": "^5.18.0",
         "eslint": "^8.12.0",
