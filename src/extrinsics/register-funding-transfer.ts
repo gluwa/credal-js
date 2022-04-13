@@ -1,5 +1,13 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { Blockchain, DealOrderId, Transfer, TransferId, TransferKind } from '../model';
+import {
+    Blockchain,
+    DealOrderId,
+    Transfer,
+    TransferEvent,
+    TransferEventKind,
+    TransferId,
+    TransferKind,
+} from '../model';
 import { GenericEventData } from '@polkadot/types/';
 import { u8aConcat, u8aToU8a } from '@polkadot/util';
 import { blake2AsHex } from '@polkadot/util-crypto';
@@ -8,20 +16,13 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { handleTransaction, handleTransactionFailed } from './common';
 import { TxCallback } from '..';
 
-export type TransferEventKind = 'TransferRegistered' | 'TransferVerified' | 'TransferProcessed';
-export type TransferEvent = {
-    kind: TransferEventKind;
-    transferId: TransferId;
-    transfer: Transfer;
-};
-
-export const createTransferId = (blockchain: Blockchain, externalAddress: string) => {
+export const createFundingTransferId = (blockchain: Blockchain, txHash: string) => {
     const blockchainBytes = Buffer.from(blockchain.toString().toLowerCase());
-    const key = u8aConcat(blockchainBytes, u8aToU8a(externalAddress));
+    const key = u8aConcat(blockchainBytes, u8aToU8a(txHash));
     return blake2AsHex(key);
 };
 
-export const registerTransfer = async (
+export const registerFundingTransfer = async (
     api: ApiPromise,
     transferKind: TransferKind,
     dealOrderId: DealOrderId,
@@ -51,7 +52,7 @@ const processTransferEvent = (api: ApiPromise, result: SubmittableResult, kind: 
     return getData(transferEvent.event.data);
 };
 
-export const registerTransferAsync = async (
+export const registerFundingTransferAsync = async (
     api: ApiPromise,
     transferKind: TransferKind,
     dealOrderId: DealOrderId,
@@ -62,6 +63,6 @@ export const registerTransferAsync = async (
         const onFail = (result: SubmittableResult) => reject(handleTransactionFailed(api, result));
         const onSuccess = (result: SubmittableResult) =>
             resolve(processTransferEvent(api, result, 'TransferRegistered'));
-        registerTransfer(api, transferKind, dealOrderId, txHash, signer, onSuccess, onFail);
+        registerFundingTransfer(api, transferKind, dealOrderId, txHash, signer, onSuccess, onFail);
     });
 };

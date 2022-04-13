@@ -1,4 +1,4 @@
-import { Keyring } from '@polkadot/api';
+import { ApiPromise, Keyring } from '@polkadot/api';
 import { creditcoinApi } from './connection';
 import { registerAddressAsync } from './extrinsics/register-address';
 import { Wallet } from 'ethers';
@@ -7,10 +7,21 @@ import { Guid } from 'js-guid';
 import { addOfferAsync, createOfferId } from './extrinsics/add-offer';
 import { addBidOrderAsync, createBidOrderId } from './extrinsics/add-bid-order';
 import { addDealOrderAsync, createDealOrderId } from './extrinsics/add-deal-order';
-import { registerDealOrderAsync, signLoanParams } from './extrinsics/register-deal-order';
+import { registerDealOrder, registerDealOrderAsync, signLoanParams } from './extrinsics/register-deal-order';
 import { lendOnEth } from './ethereum';
-import { registerTransferAsync } from './extrinsics/register-transfer';
+import { registerFundingTransferAsync } from './extrinsics/register-funding-transfer';
 import { TransferKind } from './model';
+import { KeyringPair } from '@polkadot/keyring/types';
+import dotenv from 'dotenv';
+import { addAuthorityAsync } from './extrinsics/add-authority';
+dotenv.config();
+
+const setupAuthority = async (api: ApiPromise, sudoSigner: KeyringPair) => {
+    const rpcUri = api.createType('String', 'Thttp://localhost:8545').toU8a();
+    await api.rpc.offchain.localStorageSet('PERSISTENT', 'ethereum-rpc-uri', rpcUri);
+};
+
+const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
 const main = async () => {
     const api = await creditcoinApi('ws://127.0.0.1:9944');
@@ -19,7 +30,9 @@ const main = async () => {
     console.log(lender.address);
     const borrower = keyring.addFromUri('//Bob');
 
-    const expBlock = 10000;
+    await setupAuthority(api, lender);
+
+    const expBlock = 1000000;
     const loanTerms = {
         amount: BigInt(100),
         interestRate: {
@@ -45,23 +58,24 @@ const main = async () => {
     console.log(askOrder);
     const askOrderId = createAskOrderId(expBlock, askGuid);
 
-    const borrowerAddress = await registerAddressAsync(api, Wallet.createRandom().address, 'Ethereum', borrower);
+    const borrowerWallet = Wallet.createRandom();
+    const borrowerAddress = await registerAddressAsync(api, borrowerWallet.address, 'Ethereum', borrower);
     console.log(borrowerAddress);
 
-    // const bidGuid = Guid.newGuid();
-    // const bidOrder = await addBidOrderAsync(api, borrowerAddress.addressId, loanTerms, expBlock, bidGuid, borrower);
-    // const bidOrderId = createBidOrderId(expBlock, bidGuid);
-    // console.log(bidOrder);
+    const bidGuid = Guid.newGuid();
+    const bidOrder = await addBidOrderAsync(api, borrowerAddress.addressId, loanTerms, expBlock, bidGuid, borrower);
+    const bidOrderId = createBidOrderId(expBlock, bidGuid);
+    console.log(bidOrder);
 
-    // const offer = await addOfferAsync(api, askOrderId, bidOrderId, expBlock, lender);
-    // console.log(offer);
-    // const offerId = createOfferId(expBlock, askOrderId, bidOrderId);
-    // console.log(offerId);
+    const offer = await addOfferAsync(api, askOrderId, bidOrderId, expBlock, lender);
+    console.log(offer);
+    const offerId = createOfferId(expBlock, askOrderId, bidOrderId);
+    console.log(offerId);
 
-    // const dealOrderId = createDealOrderId(expBlock, offerId);
-    // const dealOrder = await addDealOrderAsync(api, offerId, expBlock, borrower);
-    // console.log(dealOrder);
-    // console.log(dealOrderId);
+    const dealOrderId = createDealOrderId(expBlock, offerId);
+    const dealOrder = await addDealOrderAsync(api, offerId, expBlock, borrower);
+    console.log(dealOrder);
+    console.log(dealOrderId);
 
     const askGuid2 = Guid.newGuid();
     const bidGuid2 = Guid.newGuid();
@@ -87,8 +101,12 @@ const main = async () => {
         loanTerms.amount,
     );
     console.log('token address ', tokenAddress, 'tx hash ', txHash);
+
+    console.log('waiting for confirmations');
+    await sleep(20000);
     const transferKind: TransferKind = { kind: 'Ethless', contractAddress: tokenAddress };
-    const transfer = await registerTransferAsync(
+
+    const transfer = await registerFundingTransferAsync(
         api,
         transferKind,
         registerDealOrder.dealOrder.dealOrderId,
