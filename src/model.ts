@@ -96,3 +96,10 @@ export type Transfer = {
     processed: boolean;
     accountId: AccountId;
 };
+
+export type TransferEventKind = 'TransferRegistered' | 'TransferVerified' | 'TransferProcessed';
+export type TransferEvent = {
+    kind: TransferEventKind;
+    transferId: TransferId;
+    transfer: Transfer;
+};
