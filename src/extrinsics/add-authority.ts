@@ -1,12 +1,8 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { AccountId, AddressId, BidOrder, BidOrderId, LoanTerms } from '../model';
+import { AccountId } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { handleTransaction, handleTransactionFailed } from './common';
 import { TxCallback } from '../types';
-import { createBidOrder, createCreditcoinLoanTerms } from '../transforms';
-import { GenericEventData } from '@polkadot/types/';
-import { Guid } from 'js-guid';
-import { blake2AsHex } from '@polkadot/util-crypto';
 
 export const addAuthority = async (
     api: ApiPromise,

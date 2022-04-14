@@ -1,13 +1,5 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import {
-    Blockchain,
-    DealOrderId,
-    Transfer,
-    TransferEvent,
-    TransferEventKind,
-    TransferId,
-    TransferKind,
-} from '../model';
+import { Blockchain, DealOrderId, Transfer, TransferId, TransferKind } from '../model';
 import { GenericEventData } from '@polkadot/types/';
 import { u8aConcat, u8aToU8a } from '@polkadot/util';
 import { blake2AsHex } from '@polkadot/util-crypto';
@@ -15,6 +7,16 @@ import { createCreditcoinTransferKind, createTransfer } from '../transforms';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { handleTransaction, handleTransactionFailed } from './common';
 import { TxCallback } from '..';
+import { PalletCreditcoinTransfer } from '@polkadot/types/lookup';
+import { Option } from '@polkadot/types-codec';
+
+export type TransferEventKind = 'TransferRegistered' | 'TransferVerified' | 'TransferProcessed';
+export type TransferEvent = {
+    kind: TransferEventKind;
+    transferId: TransferId;
+    transfer: Transfer;
+    waitForVerification: (timeout?: number) => Promise<Transfer>;
+};
 
 export const createFundingTransferId = (blockchain: Blockchain, txHash: string) => {
     const blockchainBytes = Buffer.from(blockchain.toString().toLowerCase());
@@ -38,6 +40,22 @@ export const registerFundingTransfer = async (
         .signAndSend(signer, { nonce: -1 }, (result) => handleTransaction(api, unsubscribe, result, onSuccess, onFail));
 };
 
+export const verifiedTransfer = async (api: ApiPromise, transferId: TransferId, timeout = 20_000) => {
+    return new Promise<Transfer>((resolve, reject) => {
+        let timer: NodeJS.Timeout | undefined;
+        api.query.creditcoin
+            .transfers(transferId, (result: Option<PalletCreditcoinTransfer>) => {
+                if (!timer) timer = setTimeout(() => reject(new Error('Transfer verification timed out')), timeout);
+                if (result.isSome) {
+                    clearTimeout(timer);
+                    const transfer = createTransfer(result.unwrap());
+                    resolve(transfer);
+                }
+            })
+            .catch((reason) => reject(reason));
+    });
+};
+
 const processTransferEvent = (api: ApiPromise, result: SubmittableResult, kind: TransferEventKind): TransferEvent => {
     const { events } = result;
     const transferEvent = events.find(({ event }) => event.method === kind);
@@ -48,8 +66,9 @@ const processTransferEvent = (api: ApiPromise, result: SubmittableResult, kind: 
         const transfer = createTransfer(api.createType('PalletCreditcoinTransfer', data[1]));
         return { kind, transferId, transfer };
     };
-
-    return getData(transferEvent.event.data);
+    const transferEventData = getData(transferEvent.event.data);
+    const waitForVerification = (timeout = 180_000) => verifiedTransfer(api, transferEventData.transferId, timeout);
+    return { ...transferEventData, waitForVerification };
 };
 
 export const registerFundingTransferAsync = async (
@@ -63,6 +82,8 @@ export const registerFundingTransferAsync = async (
         const onFail = (result: SubmittableResult) => reject(handleTransactionFailed(api, result));
         const onSuccess = (result: SubmittableResult) =>
             resolve(processTransferEvent(api, result, 'TransferRegistered'));
-        registerFundingTransfer(api, transferKind, dealOrderId, txHash, signer, onSuccess, onFail);
+        registerFundingTransfer(api, transferKind, dealOrderId, txHash, signer, onSuccess, onFail).catch((reason) =>
+            reject(reason),
+        );
     });
 };

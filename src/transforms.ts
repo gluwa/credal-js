@@ -180,7 +180,7 @@ export const createTransfer = (transfer: PalletCreditcoinTransfer): Transfer => 
         kind: createTransferKind(kind),
         from: from.toString(),
         to: to.toString(),
-        orderId: (orderId.isDeal ? orderId.asDeal.toJSON : orderId.asRepayment.toJSON()) as DealOrderId,
+        orderId: (orderId.isDeal ? orderId.asDeal.toJSON() : orderId.asRepayment.toJSON()) as DealOrderId,
         amount: amount.toBigInt(),
         txHash: tx.toString(),
         blockNumber: block.toNumber(),

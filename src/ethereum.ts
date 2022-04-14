@@ -70,20 +70,12 @@ export const lendOnEth = async (lender: Wallet, borrower: string, dealOrderId: s
     const minter = new Wallet(process.env.PK1 || '', provider);
     const testToken = await deployTestToken(minter);
 
-    const fundReceipt = await fundAccount(testToken, minter, lender.address, 1_000_000);
-    console.log(fundReceipt);
+    await fundAccount(testToken, minter, lender.address, 1_000_000);
 
     const nonce = BigInt(dealOrderId);
-    console.log('nonce: ', nonce);
 
     const transferReceipt = await ethlessTransfer(minter, 3, testToken, lender, borrower, amount, 1, nonce);
 
     console.log(transferReceipt);
     return [testToken.address, transferReceipt.transactionHash];
 };
-
-const main = async () => {
-    lendOnEth(Wallet.createRandom(), Wallet.createRandom().address, '0x552345', BigInt(1000));
-};
-
-main().catch(console.error);

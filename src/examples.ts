@@ -7,13 +7,12 @@ import { Guid } from 'js-guid';
 import { addOfferAsync, createOfferId } from './extrinsics/add-offer';
 import { addBidOrderAsync, createBidOrderId } from './extrinsics/add-bid-order';
 import { addDealOrderAsync, createDealOrderId } from './extrinsics/add-deal-order';
-import { registerDealOrder, registerDealOrderAsync, signLoanParams } from './extrinsics/register-deal-order';
+import { registerDealOrderAsync, signLoanParams } from './extrinsics/register-deal-order';
 import { lendOnEth } from './ethereum';
 import { registerFundingTransferAsync } from './extrinsics/register-funding-transfer';
 import { TransferKind } from './model';
 import { KeyringPair } from '@polkadot/keyring/types';
 import dotenv from 'dotenv';
-import { addAuthorityAsync } from './extrinsics/add-authority';
 dotenv.config();
 
 const setupAuthority = async (api: ApiPromise, sudoSigner: KeyringPair) => {
@@ -30,7 +29,7 @@ const main = async () => {
     console.log(lender.address);
     const borrower = keyring.addFromUri('//Bob');
 
-    await setupAuthority(api, lender);
+    // await setupAuthority(api, lender);
 
     const expBlock = 1000000;
     const loanTerms = {
@@ -50,17 +49,19 @@ const main = async () => {
     };
 
     const lenderWallet = Wallet.createRandom();
-    const lenderAddress = await registerAddressAsync(api, lenderWallet.address, 'Ethereum', lender);
-    console.log(lenderAddress);
+    const borrowerWallet = Wallet.createRandom();
+
+    const [lenderAddress, borrowerAddress] = await Promise.all([
+        registerAddressAsync(api, lenderWallet.address, 'Ethereum', lender),
+        registerAddressAsync(api, borrowerWallet.address, 'Ethereum', borrower),
+    ]);
+    console.log('lender address', lenderAddress);
+    console.log('borrower address', borrowerAddress);
 
     const askGuid = Guid.newGuid();
     const askOrder = await addAskOrderAsync(api, lenderAddress.addressId, loanTerms, expBlock, askGuid, lender);
     console.log(askOrder);
     const askOrderId = createAskOrderId(expBlock, askGuid);
-
-    const borrowerWallet = Wallet.createRandom();
-    const borrowerAddress = await registerAddressAsync(api, borrowerWallet.address, 'Ethereum', borrower);
-    console.log(borrowerAddress);
 
     const bidGuid = Guid.newGuid();
     const bidOrder = await addBidOrderAsync(api, borrowerAddress.addressId, loanTerms, expBlock, bidGuid, borrower);
@@ -103,10 +104,10 @@ const main = async () => {
     console.log('token address ', tokenAddress, 'tx hash ', txHash);
 
     console.log('waiting for confirmations');
-    await sleep(20000);
+    await sleep(15000);
     const transferKind: TransferKind = { kind: 'Ethless', contractAddress: tokenAddress };
 
-    const transfer = await registerFundingTransferAsync(
+    const { waitForVerification, transfer } = await registerFundingTransferAsync(
         api,
         transferKind,
         registerDealOrder.dealOrder.dealOrderId,
@@ -114,6 +115,9 @@ const main = async () => {
         lender,
     );
     console.log(transfer);
+
+    const verifiedTransfer = await waitForVerification().catch();
+    console.log(verifiedTransfer);
     await api.disconnect();
 };
 
