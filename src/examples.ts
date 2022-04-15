@@ -13,6 +13,7 @@ import { registerFundingTransferAsync } from './extrinsics/register-funding-tran
 import { TransferKind } from './model';
 import { KeyringPair } from '@polkadot/keyring/types';
 import dotenv from 'dotenv';
+import { fundDealOrderAsync } from './extrinsics/fund-deal-order';
 dotenv.config();
 
 const setupAuthority = async (api: ApiPromise, sudoSigner: KeyringPair) => {
@@ -59,13 +60,15 @@ const main = async () => {
     console.log('borrower address', borrowerAddress);
 
     const askGuid = Guid.newGuid();
-    const askOrder = await addAskOrderAsync(api, lenderAddress.addressId, loanTerms, expBlock, askGuid, lender);
-    console.log(askOrder);
     const askOrderId = createAskOrderId(expBlock, askGuid);
 
     const bidGuid = Guid.newGuid();
-    const bidOrder = await addBidOrderAsync(api, borrowerAddress.addressId, loanTerms, expBlock, bidGuid, borrower);
     const bidOrderId = createBidOrderId(expBlock, bidGuid);
+    const [askOrder, bidOrder] = await Promise.all([
+        addAskOrderAsync(api, lenderAddress.addressId, loanTerms, expBlock, askGuid, lender),
+        addBidOrderAsync(api, borrowerAddress.addressId, loanTerms, expBlock, bidGuid, borrower),
+    ]);
+    console.log(askOrder);
     console.log(bidOrder);
 
     const offer = await addOfferAsync(api, askOrderId, bidOrderId, expBlock, lender);
@@ -107,7 +110,7 @@ const main = async () => {
     await sleep(15000);
     const transferKind: TransferKind = { kind: 'Ethless', contractAddress: tokenAddress };
 
-    const { waitForVerification, transfer } = await registerFundingTransferAsync(
+    const { waitForVerification, transfer, transferId } = await registerFundingTransferAsync(
         api,
         transferKind,
         registerDealOrder.dealOrder.dealOrderId,
@@ -118,7 +121,17 @@ const main = async () => {
 
     const verifiedTransfer = await waitForVerification().catch();
     console.log(verifiedTransfer);
-    await api.disconnect();
+
+    const [dealOrderFunded, transferProcessed] = await fundDealOrderAsync(
+        api,
+        registerDealOrder.dealOrder.dealOrderId,
+        transferId,
+        lender,
+    );
+    console.log(dealOrderFunded);
+    console.log(transferProcessed);
+
+    api.disconnect();
 };
 
 main().catch(console.error);
