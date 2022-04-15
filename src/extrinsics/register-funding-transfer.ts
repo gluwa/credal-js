@@ -1,11 +1,10 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { Blockchain, DealOrderId, Transfer, TransferId, TransferKind } from '../model';
-import { GenericEventData } from '@polkadot/types/';
 import { u8aConcat, u8aToU8a } from '@polkadot/util';
 import { blake2AsHex } from '@polkadot/util-crypto';
 import { createCreditcoinTransferKind, createTransfer } from '../transforms';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { handleTransaction, handleTransactionFailed } from './common';
+import { handleTransaction, handleTransactionFailed, processEvents } from './common';
 import { TxCallback } from '..';
 import { PalletCreditcoinTransfer } from '@polkadot/types/lookup';
 import { Option } from '@polkadot/types-codec';
@@ -57,16 +56,9 @@ export const verifiedTransfer = async (api: ApiPromise, transferId: TransferId, 
 };
 
 const processTransferEvent = (api: ApiPromise, result: SubmittableResult, kind: TransferEventKind): TransferEvent => {
-    const { events } = result;
-    const transferEvent = events.find(({ event }) => event.method === kind);
-    if (!transferEvent) throw new Error(`${kind} call returned invalid data`);
+    const { itemId, item } = processEvents(api, result, kind, 'PalletCreditcoinTransfer', createTransfer);
 
-    const getData = (data: GenericEventData) => {
-        const transferId = data[0].toString();
-        const transfer = createTransfer(api.createType('PalletCreditcoinTransfer', data[1]));
-        return { kind, transferId, transfer };
-    };
-    const transferEventData = getData(transferEvent.event.data);
+    const transferEventData = { kind, transferId: itemId as TransferId, transfer: item };
     const waitForVerification = (timeout = 180_000) => verifiedTransfer(api, transferEventData.transferId, timeout);
     return { ...transferEventData, waitForVerification };
 };

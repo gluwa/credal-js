@@ -131,7 +131,7 @@ const main = async () => {
     console.log(dealOrderFunded);
     console.log(transferProcessed);
 
-    api.disconnect();
+    api.disconnect().catch(console.error);
 };
 
 main().catch(console.error);

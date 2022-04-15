@@ -1,10 +1,9 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { Address, Blockchain } from '../model';
+import { Address, AddressId, Blockchain } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { handleTransaction, handleTransactionFailed } from './common';
+import { handleTransaction, handleTransactionFailed, processEvents } from './common';
 import { TxCallback } from '../types';
 import { createAddress } from '../transforms';
-import { GenericEventData } from '@polkadot/types/';
 import { u8aConcat, u8aToU8a } from '@polkadot/util';
 import { blake2AsHex } from '@polkadot/util-crypto';
 
@@ -33,17 +32,8 @@ export const registerAddress = async (
 };
 
 const processAddressRegistered = (api: ApiPromise, result: SubmittableResult): AddressRegistered => {
-    const { events } = result;
-    const addressRegistered = events.find(({ event }) => event.method === 'AddressRegistered');
-    if (!addressRegistered) throw new Error('Register Address call returned invalid data');
-
-    const getData = (data: GenericEventData) => {
-        const addressId = data[0].toString();
-        const address = createAddress(api.createType('PalletCreditcoinAddress', data[1]));
-        return { addressId, address };
-    };
-
-    return getData(addressRegistered.event.data);
+    const { itemId, item } = processEvents(api, result, 'AddressRegistered', 'PalletCreditcoinAddress', createAddress);
+    return { addressId: itemId as AddressId, address: item };
 };
 
 export const registerAddressAsync = async (

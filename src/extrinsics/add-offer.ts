@@ -1,10 +1,9 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { AskOrderId, BidOrderId, Offer, OfferId } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { handleTransaction, handleTransactionFailed } from './common';
+import { handleTransaction, handleTransactionFailed, processEvents } from './common';
 import { TxCallback } from '../types';
 import { createOffer } from '../transforms';
-import { GenericEventData } from '@polkadot/types/';
 import { blake2AsHex } from '@polkadot/util-crypto';
 import { u8aConcat } from '@polkadot/util';
 
@@ -35,17 +34,8 @@ export const addOffer = async (
 };
 
 export const processOfferAdded = (api: ApiPromise, result: SubmittableResult): OfferAdded => {
-    const { events } = result;
-    const offerAdded = events.find(({ event }) => event.method === 'OfferAdded');
-    if (!offerAdded) throw new Error('Offer call returned invalid data');
-
-    const getData = (data: GenericEventData) => {
-        const offerId = data[0].toJSON() as OfferId;
-        const offer = createOffer(api.createType('PalletCreditcoinOffer', data[1]));
-        return { offerId, offer };
-    };
-
-    return getData(offerAdded.event.data);
+    const { itemId, item } = processEvents(api, result, 'OfferAdded', 'PalletCreditcoinOffer', createOffer);
+    return { offerId: itemId as OfferId, offer: item };
 };
 
 export const addOfferAsync = async (

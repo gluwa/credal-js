@@ -1,10 +1,9 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { AddressId, BidOrder, BidOrderId, LoanTerms } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { handleTransaction, handleTransactionFailed } from './common';
+import { handleTransaction, handleTransactionFailed, processEvents } from './common';
 import { TxCallback } from '../types';
 import { createBidOrder, createCreditcoinLoanTerms } from '../transforms';
-import { GenericEventData } from '@polkadot/types/';
 import { Guid } from 'js-guid';
 import { blake2AsHex } from '@polkadot/util-crypto';
 
@@ -32,17 +31,8 @@ export const addBidOrder = async (
 };
 
 export const processBidOrderAdded = (api: ApiPromise, result: SubmittableResult): BidOrderAdded => {
-    const { events } = result;
-    const bidOrderRegistered = events.find(({ event }) => event.method === 'BidOrderAdded');
-    if (!bidOrderRegistered) throw new Error('AddBidOrder call returned invalid data');
-
-    const getData = (data: GenericEventData) => {
-        const bidOrderId = data[0].toJSON() as BidOrderId;
-        const bidOrder = createBidOrder(api.createType('PalletCreditcoinBidOrder', data[1]));
-        return { bidOrderId, bidOrder };
-    };
-
-    return getData(bidOrderRegistered.event.data);
+    const { itemId, item } = processEvents(api, result, 'BidOrderAdded', 'PalletCreditcoinBidOrder', createBidOrder);
+    return { bidOrderId: itemId as BidOrderId, bidOrder: item };
 };
 
 export const addBidOrderAsync = async (
