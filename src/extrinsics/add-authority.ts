@@ -22,6 +22,6 @@ export const addAuthorityAsync = async (api: ApiPromise, authorityAccount: Accou
     return new Promise<void>((resolve, reject) => {
         const onFail = (result: SubmittableResult) => reject(handleTransactionFailed(api, result));
         const onSuccess = (result: SubmittableResult) => resolve();
-        addAuthority(api, authorityAccount, sudoSigner, onSuccess, onFail).catch((reason) => reject(reason));
+        addAuthority(api, authorityAccount, sudoSigner, onSuccess, onFail).catch(reject);
     });
 };
