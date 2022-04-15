@@ -29,7 +29,7 @@ export type LoanTerms = {
     termLength: Duration;
 };
 
-type TupleId = [number, string];
+export type TupleId = [number, string];
 export type AskOrderId = TupleId;
 export type BidOrderId = TupleId;
 

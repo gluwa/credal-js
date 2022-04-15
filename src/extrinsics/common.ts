@@ -1,4 +1,7 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
+import { GenericEventData } from '@polkadot/types';
+import { Codec } from '@polkadot/types-codec/types';
+import { TupleId } from '../model';
 
 export const handleTransactionFailed = (api: ApiPromise, result: SubmittableResult) => {
     const { dispatchError } = result;
@@ -46,4 +49,30 @@ export const handleTransaction = (
         onSuccess(result);
         unsubscribe();
     }
+};
+
+type EventData<ItemType> = {
+    itemId: TupleId | string;
+    item: ItemType;
+};
+
+export const processEvents = <ItemType, SourceType extends Codec>(
+    api: ApiPromise,
+    result: SubmittableResult,
+    eventMethod: string,
+    creditcoinType: string,
+    transform: (data: SourceType) => ItemType,
+): EventData<ItemType> => {
+    const { events } = result;
+    const sourceEvents = events.find(({ event }) => event.method === eventMethod);
+    if (!sourceEvents) throw new Error(`No ${eventMethod} events found`); //return or throw error?
+
+    const getData = (data: GenericEventData): EventData<ItemType> => {
+        const itemId = data[0].toJSON() as TupleId | string;
+        const sourceItem = api.createType(creditcoinType, data[1]) as SourceType;
+        const item = transform(sourceItem);
+        return { itemId, item };
+    };
+
+    return getData(sourceEvents.event.data);
 };
