@@ -1,5 +1,5 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { DealOrder, DealOrderId, OfferId, Transfer, TransferId, TupleId } from '../model';
+import { DealOrder, DealOrderId, Transfer, TransferId } from '../model';
 import { createDealOrder, createTransfer } from '../transforms';
 import { TxCallback } from '../types';
 import { handleTransaction, handleTransactionFailed, processEvents } from './common';
@@ -33,8 +33,14 @@ export const processDealOrderFunded = (
     api: ApiPromise,
     result: SubmittableResult,
 ): [DealOrderFunded, TransferProcessed] => {
-    const dealOrderFunded = processEvents(api, result, 'DealOrderFunded', 'PalletCreditcoinDealOrder', createDealOrder);
-    const transferProcessed = processEvents(
+    const { itemId: dealOrderId, item: dealOrder } = processEvents(
+        api,
+        result,
+        'DealOrderFunded',
+        'PalletCreditcoinDealOrder',
+        createDealOrder,
+    );
+    const { itemId: transferId, item: transfer } = processEvents(
         api,
         result,
         'TransferProcessed',
@@ -42,8 +48,8 @@ export const processDealOrderFunded = (
         createTransfer,
     );
     return [
-        { dealOrderId: dealOrderFunded.itemId as TupleId, dealOrder: dealOrderFunded.item },
-        { transferId: transferProcessed.itemId as string, transfer: transferProcessed.item },
+        { dealOrderId: dealOrderId as DealOrderId, dealOrder },
+        { transferId: transferId as TransferId, transfer },
     ];
 };
 

@@ -65,7 +65,7 @@ export const processEvents = <ItemType, SourceType extends Codec>(
 ): EventData<ItemType> => {
     const { events } = result;
     const sourceEvents = events.find(({ event }) => event.method === eventMethod);
-    if (!sourceEvents) throw new Error(`No ${eventMethod} events found`); //return or throw error?
+    if (!sourceEvents) throw new Error(`No ${eventMethod} events found`);
 
     const getData = (data: GenericEventData): EventData<ItemType> => {
         const itemId = data[0].toJSON() as TupleId | string;
