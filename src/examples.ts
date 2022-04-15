@@ -1,36 +1,36 @@
-import { ApiPromise, Keyring } from '@polkadot/api';
-import { creditcoinApi } from './connection';
-import { registerAddressAsync } from './extrinsics/register-address';
+import { Keyring } from '@polkadot/api';
+import { creditcoinApi } from './creditcoin-api';
 import { Wallet } from 'ethers';
-import { addAskOrderAsync, createAskOrderId } from './extrinsics/add-ask-order';
+import { createAskOrderId } from './extrinsics/add-ask-order';
 import { Guid } from 'js-guid';
-import { addOfferAsync, createOfferId } from './extrinsics/add-offer';
-import { addBidOrderAsync, createBidOrderId } from './extrinsics/add-bid-order';
-import { addDealOrderAsync, createDealOrderId } from './extrinsics/add-deal-order';
-import { registerDealOrderAsync, signLoanParams } from './extrinsics/register-deal-order';
+import { createOfferId } from './extrinsics/add-offer';
+import { createBidOrderId } from './extrinsics/add-bid-order';
+import { createDealOrderId } from './extrinsics/add-deal-order';
+import { signLoanParams } from './extrinsics/register-deal-order';
 import { lendOnEth } from './ethereum';
-import { registerFundingTransferAsync } from './extrinsics/register-funding-transfer';
 import { TransferKind } from './model';
-import { KeyringPair } from '@polkadot/keyring/types';
 import dotenv from 'dotenv';
-import { fundDealOrderAsync } from './extrinsics/fund-deal-order';
 dotenv.config();
-
-const setupAuthority = async (api: ApiPromise, sudoSigner: KeyringPair) => {
-    const rpcUri = api.createType('String', 'Thttp://localhost:8545').toU8a();
-    await api.rpc.offchain.localStorageSet('PERSISTENT', 'ethereum-rpc-uri', rpcUri);
-};
 
 const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
 const main = async () => {
-    const api = await creditcoinApi('ws://127.0.0.1:9944');
+    const { api, extrinsics } = await creditcoinApi('ws://127.0.0.1:9944');
+    const {
+        registerAddress,
+        addAskOrder,
+        addBidOrder,
+        addOffer,
+        addDealOrder,
+        registerDealOrder,
+        registerFundingTransfer,
+        fundDealOrder,
+    } = extrinsics;
+
     const keyring = new Keyring({ type: 'sr25519' });
     const lender = keyring.addFromUri('//Alice');
     console.log(lender.address);
     const borrower = keyring.addFromUri('//Bob');
-
-    // await setupAuthority(api, lender);
 
     const expBlock = 1000000;
     const loanTerms = {
@@ -53,8 +53,8 @@ const main = async () => {
     const borrowerWallet = Wallet.createRandom();
 
     const [lenderAddress, borrowerAddress] = await Promise.all([
-        registerAddressAsync(api, lenderWallet.address, 'Ethereum', lender),
-        registerAddressAsync(api, borrowerWallet.address, 'Ethereum', borrower),
+        registerAddress(lenderWallet.address, 'Ethereum', lender),
+        registerAddress(borrowerWallet.address, 'Ethereum', borrower),
     ]);
     console.log('lender address', lenderAddress);
     console.log('borrower address', borrowerAddress);
@@ -65,27 +65,26 @@ const main = async () => {
     const bidGuid = Guid.newGuid();
     const bidOrderId = createBidOrderId(expBlock, bidGuid);
     const [askOrder, bidOrder] = await Promise.all([
-        addAskOrderAsync(api, lenderAddress.addressId, loanTerms, expBlock, askGuid, lender),
-        addBidOrderAsync(api, borrowerAddress.addressId, loanTerms, expBlock, bidGuid, borrower),
+        addAskOrder(lenderAddress.addressId, loanTerms, expBlock, askGuid, lender),
+        addBidOrder(borrowerAddress.addressId, loanTerms, expBlock, bidGuid, borrower),
     ]);
     console.log(askOrder);
     console.log(bidOrder);
 
-    const offer = await addOfferAsync(api, askOrderId, bidOrderId, expBlock, lender);
+    const offer = await addOffer(askOrderId, bidOrderId, expBlock, lender);
     console.log(offer);
     const offerId = createOfferId(expBlock, askOrderId, bidOrderId);
     console.log(offerId);
 
     const dealOrderId = createDealOrderId(expBlock, offerId);
-    const dealOrder = await addDealOrderAsync(api, offerId, expBlock, borrower);
+    const dealOrder = await addDealOrder(offerId, expBlock, borrower);
     console.log(dealOrder);
     console.log(dealOrderId);
 
     const askGuid2 = Guid.newGuid();
     const bidGuid2 = Guid.newGuid();
     const signedParams = signLoanParams(api, borrower, expBlock, askGuid2, bidGuid2, loanTerms);
-    const registerDealOrder = await registerDealOrderAsync(
-        api,
+    const dealOrder2 = await registerDealOrder(
         lenderAddress.addressId,
         borrowerAddress.addressId,
         loanTerms,
@@ -96,12 +95,12 @@ const main = async () => {
         signedParams,
         lender,
     );
-    console.log(registerDealOrder);
+    console.log(dealOrder2);
 
     const [tokenAddress, txHash] = await lendOnEth(
         lenderWallet,
         borrowerWallet.address,
-        registerDealOrder.dealOrder.dealOrderId[1],
+        dealOrder2.dealOrder.dealOrderId[1],
         loanTerms.amount,
     );
     console.log('token address ', tokenAddress, 'tx hash ', txHash);
@@ -110,10 +109,9 @@ const main = async () => {
     await sleep(15000);
     const transferKind: TransferKind = { kind: 'Ethless', contractAddress: tokenAddress };
 
-    const { waitForVerification, transfer, transferId } = await registerFundingTransferAsync(
-        api,
+    const { waitForVerification, transfer, transferId } = await registerFundingTransfer(
         transferKind,
-        registerDealOrder.dealOrder.dealOrderId,
+        dealOrder2.dealOrder.dealOrderId,
         txHash,
         lender,
     );
@@ -122,9 +120,8 @@ const main = async () => {
     const verifiedTransfer = await waitForVerification().catch();
     console.log(verifiedTransfer);
 
-    const [dealOrderFunded, transferProcessed] = await fundDealOrderAsync(
-        api,
-        registerDealOrder.dealOrder.dealOrderId,
+    const [dealOrderFunded, transferProcessed] = await fundDealOrder(
+        dealOrder2.dealOrder.dealOrderId,
         transferId,
         lender,
     );

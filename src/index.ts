@@ -1,3 +1,3 @@
-export * from './connection';
-export * from './extrinsics/register-address';
+export * from './creditcoin-api';
 export * from './types';
+export * from './model';

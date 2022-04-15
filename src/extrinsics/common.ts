@@ -15,6 +15,7 @@ export const handleTransactionFailed = (api: ApiPromise, result: SubmittableResu
     }
     return new Error('Unknown Error');
 };
+
 export const handleTransaction = (
     api: ApiPromise,
     unsubscribe: () => void,
