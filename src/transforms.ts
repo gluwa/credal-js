@@ -125,6 +125,7 @@ export const createDealOrder = (dealOrder: PalletCreditcoinDealOrder): DealOrder
         repaymentTransferId,
         lock,
         borrower,
+        block,
     } = dealOrder;
     return {
         offerId: offerId.toJSON() as OfferId,
@@ -137,6 +138,7 @@ export const createDealOrder = (dealOrder: PalletCreditcoinDealOrder): DealOrder
         repaymentTransferId: repaymentTransferId.unwrapOr(undefined)?.toString(),
         lock: lock.unwrapOr(undefined)?.toString(),
         borrower: borrower.toString(),
+        block: block.unwrapOr(undefined)?.toNumber(),
     };
 };
 
@@ -174,7 +176,7 @@ export const createTransferKind = (transferKind: PalletCreditcoinTransferKind): 
 };
 
 export const createTransfer = (transfer: PalletCreditcoinTransfer): Transfer => {
-    const { blockchain, kind, from, to, orderId, amount, tx, block, processed, sighash } = transfer;
+    const { blockchain, kind, from, to, orderId, amount, txId, block, isProcessed, accountId, timestamp } = transfer;
     return {
         blockchain: blockchain.type,
         kind: createTransferKind(kind),
@@ -182,9 +184,10 @@ export const createTransfer = (transfer: PalletCreditcoinTransfer): Transfer => 
         to: to.toString(),
         orderId: (orderId.isDeal ? orderId.asDeal.toJSON() : orderId.asRepayment.toJSON()) as DealOrderId,
         amount: amount.toBigInt(),
-        txHash: tx.toString(),
+        txHash: txId.toString(),
         blockNumber: block.toNumber(),
-        processed: processed.isTrue,
-        accountId: sighash.toString(),
+        processed: isProcessed.isTrue,
+        accountId: accountId.toString(),
+        timestamp: timestamp.isSome ? new Date(timestamp.unwrap().toNumber()) : undefined,
     };
 };

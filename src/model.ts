@@ -74,6 +74,7 @@ export type DealOrder = {
     repaymentTransferId?: string;
     lock?: string;
     borrower: AccountId;
+    block?: number;
 };
 
 export type TransferId = string;
@@ -95,4 +96,5 @@ export type Transfer = {
     blockNumber: number;
     processed: boolean;
     accountId: AccountId;
+    timestamp?: Date;
 };
