@@ -21,7 +21,7 @@ export const addAuthority = async (
 export const addAuthorityAsync = async (api: ApiPromise, authorityAccount: AccountId, sudoSigner: KeyringPair) => {
     return new Promise<void>((resolve, reject) => {
         const onFail = (result: SubmittableResult) => reject(handleTransactionFailed(api, result));
-        const onSuccess = (result: SubmittableResult) => resolve();
+        const onSuccess = (result: SubmittableResult) => resolve(); // eslint-disable-line @typescript-eslint/no-unused-vars
         addAuthority(api, authorityAccount, sudoSigner, onSuccess, onFail).catch(reject);
     });
 };
