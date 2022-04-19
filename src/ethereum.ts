@@ -67,6 +67,8 @@ const ethlessTransfer = async (
 export const lendOnEth = async (lender: Wallet, borrower: string, dealOrderId: string, amount: BigInt) => {
     const provider = new JsonRpcProvider('http://localhost:8545');
 
+    await provider.send('evm_setIntervalMining', [500]);
+
     const minter = new Wallet(process.env.PK1 || '', provider);
     const testToken = await deployTestToken(minter);
 
