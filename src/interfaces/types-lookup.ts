@@ -300,6 +300,8 @@ declare module '@polkadot/types/lookup' {
         readonly asDealOrderAdded: ITuple<[PalletCreditcoinDealOrderId, PalletCreditcoinDealOrder]>;
         readonly isDealOrderFunded: boolean;
         readonly asDealOrderFunded: ITuple<[PalletCreditcoinDealOrderId, PalletCreditcoinDealOrder]>;
+        readonly isDealOrderLocked: boolean;
+        readonly asDealOrderLocked: ITuple<[PalletCreditcoinDealOrderId, PalletCreditcoinDealOrder]>;
         readonly isDealOrderClosed: boolean;
         readonly asDealOrderClosed: ITuple<[PalletCreditcoinDealOrderId, PalletCreditcoinDealOrder]>;
         readonly isLoanExempted: boolean;
@@ -316,6 +318,7 @@ declare module '@polkadot/types/lookup' {
             | 'OfferAdded'
             | 'DealOrderAdded'
             | 'DealOrderFunded'
+            | 'DealOrderLocked'
             | 'DealOrderClosed'
             | 'LoanExempted'
             | 'LegacyWalletClaimed';
