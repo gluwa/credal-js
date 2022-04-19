@@ -20,6 +20,7 @@ import {
     TransferId,
 } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { lockDealOrderAsync } from './lock-deal-order';
 
 export const extrinsics = (api: ApiPromise) => {
     const registerAddress = async (externalAddress: string, blockchain: Blockchain, signer: KeyringPair) =>
@@ -85,6 +86,9 @@ export const extrinsics = (api: ApiPromise) => {
     const fundDealOrder = async (dealOrderId: DealOrderId, transferId: TransferId, lender: KeyringPair) =>
         fundDealOrderAsync(api, dealOrderId, transferId, lender);
 
+    const lockDealOrder = async (dealOrderId: DealOrderId, borrower: KeyringPair) =>
+        lockDealOrderAsync(api, dealOrderId, borrower);
+
     return {
         registerAddress,
         addAskOrder,
@@ -94,5 +98,6 @@ export const extrinsics = (api: ApiPromise) => {
         registerDealOrder,
         registerFundingTransfer,
         fundDealOrder,
+        lockDealOrder,
     };
 };
