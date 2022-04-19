@@ -10,6 +10,7 @@ import { signLoanParams } from './extrinsics/register-deal-order';
 import { lendOnEth } from './ethereum';
 import { TransferKind } from './model';
 import dotenv from 'dotenv';
+import { addAuthorityAsync } from './extrinsics/add-authority';
 dotenv.config();
 
 const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
@@ -25,12 +26,15 @@ const main = async () => {
         registerDealOrder,
         registerFundingTransfer,
         fundDealOrder,
+        lockDealOrder,
     } = extrinsics;
 
     const keyring = new Keyring({ type: 'sr25519' });
     const lender = keyring.addFromUri('//Alice');
     console.log(lender.address);
     const borrower = keyring.addFromUri('//Bob');
+
+    // await addAuthorityAsync(api, '5C7conswAmt3HJrSyhcehWo7qqwy4f2thW2P2VLz1x4yMW6e', lender).catch(console.error);
 
     const expBlock = 1000000;
     const loanTerms = {
@@ -128,7 +132,10 @@ const main = async () => {
     console.log(dealOrderFunded);
     console.log(transferProcessed);
 
-    api.disconnect().catch(console.error);
+    const lockedDealOrder = await lockDealOrder(dealOrder2.dealOrder.dealOrderId, borrower);
+    console.log(lockedDealOrder);
+
+    await api.disconnect().catch(console.error);
 };
 
 main().catch(console.error);
