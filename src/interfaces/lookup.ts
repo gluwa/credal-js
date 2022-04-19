@@ -227,6 +227,7 @@ export default {
             OfferAdded: '(PalletCreditcoinOfferId,PalletCreditcoinOffer)',
             DealOrderAdded: '(PalletCreditcoinDealOrderId,PalletCreditcoinDealOrder)',
             DealOrderFunded: '(PalletCreditcoinDealOrderId,PalletCreditcoinDealOrder)',
+            DealOrderLocked: '(PalletCreditcoinDealOrderId,PalletCreditcoinDealOrder)',
             DealOrderClosed: '(PalletCreditcoinDealOrderId,PalletCreditcoinDealOrder)',
             LoanExempted: 'PalletCreditcoinDealOrderId',
             LegacyWalletClaimed: '(AccountId32,PalletCreditcoinLegacySighash,u128)',
