@@ -64,18 +64,31 @@ const ethlessTransfer = async (
     return receipt;
 };
 
-export const lendOnEth = async (lender: Wallet, borrower: string, dealOrderId: string, amount: BigInt) => {
-    const provider = new JsonRpcProvider('http://localhost:8545');
-
+export const ethConnection = async (providerRpcUrl = 'http://localhost:8545') => {
+    const provider = new JsonRpcProvider(providerRpcUrl);
     const minter = new Wallet(process.env.PK1 || '', provider);
     const testToken = await deployTestToken(minter);
 
-    await fundAccount(testToken, minter, lender.address, 1_000_000);
+    const lend = async (lender: Wallet, borrower: string, dealOrderId: string, amount: BigInt) => {
+        await fundAccount(testToken, minter, lender.address, 1_000_000);
 
-    const nonce = BigInt(dealOrderId);
+        const nonce = BigInt(dealOrderId);
 
-    const transferReceipt = await ethlessTransfer(minter, 3, testToken, lender, borrower, amount, 1, nonce);
+        const transferReceipt = await ethlessTransfer(minter, 3, testToken, lender, borrower, amount, 0, nonce);
 
-    console.log(transferReceipt);
-    return [testToken.address, transferReceipt.transactionHash];
+        console.log(transferReceipt);
+        return [testToken.address, transferReceipt.transactionHash];
+    };
+
+    const repay = async (borrower: Wallet, lender: string, dealOrderId: string, amount: BigInt) => {
+        await fundAccount(testToken, minter, borrower.address, 1_000_000);
+
+        const nonce = BigInt(dealOrderId);
+
+        const transferReceipt = await ethlessTransfer(minter, 3, testToken, borrower, lender, amount, 0, nonce);
+
+        console.log(transferReceipt);
+        return [testToken.address, transferReceipt.transactionHash];
+    };
+    return { lend, repay };
 };

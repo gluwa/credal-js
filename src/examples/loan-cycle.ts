@@ -7,11 +7,10 @@ import { createOfferId } from '../extrinsics/add-offer';
 import { createBidOrderId } from '../extrinsics/add-bid-order';
 import { createDealOrderId } from '../extrinsics/add-deal-order';
 import { signLoanParams } from '../extrinsics/register-deal-order';
-import { lendOnEth } from './ethereum';
+import { ethConnection } from './ethereum';
 import { TransferKind } from '../model';
 import dotenv from 'dotenv';
 import { setupAuthority } from './setupAuthority';
-
 dotenv.config();
 
 const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
@@ -28,6 +27,7 @@ const main = async () => {
         registerFundingTransfer,
         fundDealOrder,
         lockDealOrder,
+        registerRepaymentTransfer,
     } = extrinsics;
 
     const keyring = new Keyring({ type: 'sr25519' });
@@ -100,14 +100,16 @@ const main = async () => {
         lender,
     );
     console.log(dealOrder2);
+    const dealOrder2Id = dealOrder2.dealOrder.dealOrderId;
 
-    const [tokenAddress, txHash] = await lendOnEth(
+    const { lend, repay } = await ethConnection();
+    const [tokenAddress, lendTxHash] = await lend(
         lenderWallet,
         borrowerWallet.address,
-        dealOrder2.dealOrder.dealOrderId[1],
+        dealOrder2Id[1],
         loanTerms.amount,
     );
-    console.log('token address ', tokenAddress, 'tx hash ', txHash);
+    console.log('token address ', tokenAddress, 'tx hash ', lendTxHash);
 
     console.log('waiting for confirmations');
     await sleep(15000);
@@ -115,8 +117,8 @@ const main = async () => {
 
     const { waitForVerification, transfer, transferId } = await registerFundingTransfer(
         transferKind,
-        dealOrder2.dealOrder.dealOrderId,
-        txHash,
+        dealOrder2Id,
+        lendTxHash,
         lender,
     );
     console.log(transfer);
@@ -124,16 +126,27 @@ const main = async () => {
     const verifiedTransfer = await waitForVerification().catch();
     console.log(verifiedTransfer);
 
-    const [dealOrderFunded, transferProcessed] = await fundDealOrder(
-        dealOrder2.dealOrder.dealOrderId,
-        transferId,
-        lender,
-    );
+    const [dealOrderFunded, transferProcessed] = await fundDealOrder(dealOrder2Id, transferId, lender);
     console.log(dealOrderFunded);
     console.log(transferProcessed);
 
-    const lockedDealOrder = await lockDealOrder(dealOrder2.dealOrder.dealOrderId, borrower);
+    const lockedDealOrder = await lockDealOrder(dealOrder2Id, borrower);
     console.log(lockedDealOrder);
+
+    const [, repayTxHash] = await repay(borrowerWallet, lenderWallet.address, dealOrder2Id[1], loanTerms.amount);
+    await sleep(15000);
+
+    const registeredRepayment = await registerRepaymentTransfer(
+        transferKind,
+        loanTerms.amount,
+        dealOrder2Id,
+        repayTxHash,
+        borrower,
+    );
+
+    console.log(registeredRepayment);
+    const verifiedRepayment = await registeredRepayment.waitForVerification().catch();
+    console.log('verification:', verifiedRepayment);
 
     await api.disconnect().catch(console.error);
 };
