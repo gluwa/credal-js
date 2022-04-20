@@ -92,12 +92,27 @@ export const ethConnection = async (providerRpcUrl = 'http://localhost:8545') =>
         return [testToken.address, transferReceipt.transactionHash, transferReceipt.blockNumber];
     };
 
+<<<<<<< HEAD
     const repay = async (
         borrower: Wallet,
         lender: string,
         dealOrderId: string,
         amount: BigInt,
     ): Promise<[string, string, number]> => {
+=======
+    const lend = async (lender: Wallet, borrower: string, dealOrderId: string, amount: BigInt) => {
+        await fundAccount(testToken, minter, lender.address, 1_000_000);
+
+        const nonce = BigInt(dealOrderId);
+
+        const transferReceipt = await ethlessTransfer(minter, 3, testToken, lender, borrower, amount, 0, nonce);
+
+        console.log(transferReceipt);
+        return [testToken.address, transferReceipt.transactionHash];
+    };
+
+    const repay = async (borrower: Wallet, lender: string, dealOrderId: string, amount: BigInt) => {
+>>>>>>> add registerRepaymentTransfer functionality
         await fundAccount(testToken, minter, borrower.address, 1_000_000);
 
         const nonce = BigInt(dealOrderId);
@@ -105,7 +120,13 @@ export const ethConnection = async (providerRpcUrl = 'http://localhost:8545') =>
         const transferReceipt = await ethlessTransfer(minter, 3, testToken, borrower, lender, amount, 0, nonce);
 
         console.log(transferReceipt);
+<<<<<<< HEAD
         return [testToken.address, transferReceipt.transactionHash, transferReceipt.blockNumber];
     };
     return { lend, repay, waitUntilTip };
+=======
+        return [testToken.address, transferReceipt.transactionHash];
+    };
+    return { lend, repay };
+>>>>>>> add registerRepaymentTransfer functionality
 };
