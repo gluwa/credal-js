@@ -7,7 +7,7 @@ import { addOfferAsync } from './add-offer';
 import { fundDealOrderAsync } from './fund-deal-order';
 import { registerAddressAsync } from './register-address';
 import { registerDealOrderAsync } from './register-deal-order';
-import { registerFundingTransferAsync } from './register-funding-transfer';
+import { registerFundingTransferAsync, registerRepaymentTransferAsync } from './register-transfers';
 import {
     Blockchain,
     AddressId,
@@ -80,14 +80,22 @@ export const extrinsics = (api: ApiPromise) => {
         transferKind: TransferKind,
         dealOrderId: DealOrderId,
         txHash: string,
-        signer: KeyringPair,
-    ) => registerFundingTransferAsync(api, transferKind, dealOrderId, txHash, signer);
+        lender: KeyringPair,
+    ) => registerFundingTransferAsync(api, transferKind, dealOrderId, txHash, lender);
 
     const fundDealOrder = async (dealOrderId: DealOrderId, transferId: TransferId, lender: KeyringPair) =>
         fundDealOrderAsync(api, dealOrderId, transferId, lender);
 
     const lockDealOrder = async (dealOrderId: DealOrderId, borrower: KeyringPair) =>
         lockDealOrderAsync(api, dealOrderId, borrower);
+
+    const registerRepaymentTransfer = async (
+        transferKind: TransferKind,
+        repaymentAmount: BigInt,
+        dealOrderId: DealOrderId,
+        txHash: string,
+        borrower: KeyringPair,
+    ) => registerRepaymentTransferAsync(api, transferKind, repaymentAmount, dealOrderId, txHash, borrower);
 
     return {
         registerAddress,
@@ -99,5 +107,6 @@ export const extrinsics = (api: ApiPromise) => {
         registerFundingTransfer,
         fundDealOrder,
         lockDealOrder,
+        registerRepaymentTransfer,
     };
 };
