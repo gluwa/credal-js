@@ -100,8 +100,13 @@ const main = async () => {
     console.log(dealOrder2);
     const dealOrder2Id = dealOrder2.dealOrder.dealOrderId;
 
+<<<<<<< HEAD
     const { lend, repay, waitUntilTip } = await ethConnection();
     const [tokenAddress, lendTxHash, lendBlockNumber] = await lend(
+=======
+    const { lend, repay } = await ethConnection();
+    const [tokenAddress, lendTxHash] = await lend(
+>>>>>>> add registerRepaymentTransfer functionality
         lenderWallet,
         borrowerWallet.address,
         dealOrder2Id[1],
@@ -132,6 +137,7 @@ const main = async () => {
     const lockedDealOrder = await lockDealOrder(dealOrder2Id, borrower);
     console.log(lockedDealOrder);
 
+<<<<<<< HEAD
     const [, repayTxHash, repayBlockNumber] = await repay(
         borrowerWallet,
         lenderWallet.address,
@@ -139,6 +145,10 @@ const main = async () => {
         loanTerms.amount,
     );
     await waitUntilTip(repayBlockNumber + 12);
+=======
+    const [, repayTxHash] = await repay(borrowerWallet, lenderWallet.address, dealOrder2Id[1], loanTerms.amount);
+    await sleep(15000);
+>>>>>>> add registerRepaymentTransfer functionality
 
     const registeredRepayment = await registerRepaymentTransfer(
         transferKind,
