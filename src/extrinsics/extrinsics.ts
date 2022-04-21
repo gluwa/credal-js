@@ -21,12 +21,13 @@ import {
 } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { lockDealOrderAsync } from './lock-deal-order';
+import { closeDealOrderAsync } from './close-deal-order';
 
 export const extrinsics = (api: ApiPromise) => {
-    const registerAddress = async (externalAddress: string, blockchain: Blockchain, signer: KeyringPair) =>
+    const registerAddress = (externalAddress: string, blockchain: Blockchain, signer: KeyringPair) =>
         registerAddressAsync(api, externalAddress, blockchain, signer);
 
-    const addAskOrder = async (
+    const addAskOrder = (
         lenderAddressId: AddressId,
         loanTerms: LoanTerms,
         expirationBlock: number,
@@ -34,7 +35,7 @@ export const extrinsics = (api: ApiPromise) => {
         signer: KeyringPair,
     ) => addAskOrderAsync(api, lenderAddressId, loanTerms, expirationBlock, guid, signer);
 
-    const addBidOrder = async (
+    const addBidOrder = (
         borrowerAddressId: AddressId,
         loanTerms: LoanTerms,
         expirationBlock: number,
@@ -42,17 +43,13 @@ export const extrinsics = (api: ApiPromise) => {
         signer: KeyringPair,
     ) => addBidOrderAsync(api, borrowerAddressId, loanTerms, expirationBlock, guid, signer);
 
-    const addOffer = async (
-        askOrderId: AskOrderId,
-        bidOrderId: BidOrderId,
-        expirationBlock: number,
-        signer: KeyringPair,
-    ) => addOfferAsync(api, askOrderId, bidOrderId, expirationBlock, signer);
+    const addOffer = (askOrderId: AskOrderId, bidOrderId: BidOrderId, expirationBlock: number, signer: KeyringPair) =>
+        addOfferAsync(api, askOrderId, bidOrderId, expirationBlock, signer);
 
-    const addDealOrder = async (offerId: OfferId, expirationBlock: number, signer: KeyringPair) =>
+    const addDealOrder = (offerId: OfferId, expirationBlock: number, signer: KeyringPair) =>
         addDealOrderAsync(api, offerId, expirationBlock, signer);
 
-    const registerDealOrder = async (
+    const registerDealOrder = (
         lenderAddressId: AddressId,
         borrowerAddressId: AddressId,
         loanTerms: LoanTerms,
@@ -76,26 +73,29 @@ export const extrinsics = (api: ApiPromise) => {
             lender,
         );
 
-    const registerFundingTransfer = async (
+    const registerFundingTransfer = (
         transferKind: TransferKind,
         dealOrderId: DealOrderId,
         txHash: string,
         lender: KeyringPair,
     ) => registerFundingTransferAsync(api, transferKind, dealOrderId, txHash, lender);
 
-    const fundDealOrder = async (dealOrderId: DealOrderId, transferId: TransferId, lender: KeyringPair) =>
+    const fundDealOrder = (dealOrderId: DealOrderId, transferId: TransferId, lender: KeyringPair) =>
         fundDealOrderAsync(api, dealOrderId, transferId, lender);
 
-    const lockDealOrder = async (dealOrderId: DealOrderId, borrower: KeyringPair) =>
+    const lockDealOrder = (dealOrderId: DealOrderId, borrower: KeyringPair) =>
         lockDealOrderAsync(api, dealOrderId, borrower);
 
-    const registerRepaymentTransfer = async (
+    const registerRepaymentTransfer = (
         transferKind: TransferKind,
         repaymentAmount: BigInt,
         dealOrderId: DealOrderId,
         txHash: string,
         borrower: KeyringPair,
     ) => registerRepaymentTransferAsync(api, transferKind, repaymentAmount, dealOrderId, txHash, borrower);
+
+    const closeDealOrder = (dealOrderId: DealOrderId, transferId: TransferId, borrower: KeyringPair) =>
+        closeDealOrderAsync(api, dealOrderId, transferId, borrower);
 
     return {
         registerAddress,
@@ -108,5 +108,6 @@ export const extrinsics = (api: ApiPromise) => {
         fundDealOrder,
         lockDealOrder,
         registerRepaymentTransfer,
+        closeDealOrder,
     };
 };

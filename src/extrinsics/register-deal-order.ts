@@ -1,7 +1,6 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { u8aConcat } from '@polkadot/util';
-
-import { AddressId, LoanTerms } from '../model';
+import { AddressId, DealOrderAdded, LoanTerms } from '../model';
 import { createCreditcoinLoanTerms } from '../transforms';
 import { TxCallback } from '../types';
 import { handleTransaction, handleTransactionFailed } from './common';
@@ -9,7 +8,7 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { AskOrderAdded, processAskOrderAdded } from './add-ask-order';
 import { BidOrderAdded, processBidOrderAdded } from './add-bid-order';
 import { OfferAdded, processOfferAdded } from './add-offer';
-import { DealOrderAdded, processDealOrderAdded } from './add-deal-order';
+import { processDealOrderAdded } from './add-deal-order';
 import { Guid } from 'js-guid';
 
 export type DealOrderRegistered = {

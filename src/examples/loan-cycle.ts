@@ -26,6 +26,7 @@ const main = async () => {
         fundDealOrder,
         lockDealOrder,
         registerRepaymentTransfer,
+        closeDealOrder,
     } = extrinsics;
 
     const keyring = new Keyring({ type: 'sr25519' });
@@ -161,6 +162,9 @@ const main = async () => {
     console.log(registeredRepayment);
     const verifiedRepayment = await registeredRepayment.waitForVerification().catch();
     console.log('verification:', verifiedRepayment);
+
+    const closedDealOrder = await closeDealOrder(dealOrder2Id, registeredRepayment.transferId, borrower);
+    console.log('closed deal order', closedDealOrder);
 
     await api.disconnect().catch(console.error);
 };
