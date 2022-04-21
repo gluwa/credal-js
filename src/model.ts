@@ -1,3 +1,5 @@
+import { BN } from '@polkadot/util';
+
 export type AddressId = string;
 
 export type AccountId = string;
@@ -24,7 +26,7 @@ export type InterestRate = {
 };
 
 export type LoanTerms = {
-    amount: BigInt;
+    amount: BN;
     interestRate: InterestRate;
     termLength: Duration;
 };
@@ -101,7 +103,7 @@ export type Transfer = {
     from: AddressId;
     to: AddressId;
     orderId: DealOrderId;
-    amount: BigInt;
+    amount: BN;
     txHash: string;
     blockNumber: number;
     processed: boolean;

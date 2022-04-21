@@ -50,7 +50,7 @@ export const createInterestRate = ({
 });
 
 export const createLoanTerms = ({ amount, interestRate, termLength }: PalletCreditcoinLoanTerms): LoanTerms => ({
-    amount: amount.toBigInt(),
+    amount,
     interestRate: createInterestRate(interestRate),
     termLength: createDuration(termLength),
 });
@@ -183,7 +183,7 @@ export const createTransfer = (transfer: PalletCreditcoinTransfer): Transfer => 
         from: from.toString(),
         to: to.toString(),
         orderId: (orderId.isDeal ? orderId.asDeal.toJSON() : orderId.asRepayment.toJSON()) as DealOrderId,
-        amount: amount.toBigInt(),
+        amount,
         txHash: txId.toString(),
         blockNumber: block.toNumber(),
         processed: isProcessed.isTrue,

@@ -1,4 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
+import { BN } from '@polkadot/util';
 import { Guid } from 'js-guid';
 import { addAskOrderAsync } from './add-ask-order';
 import { addBidOrderAsync } from './add-bid-order';
@@ -89,7 +90,7 @@ export const extrinsics = (api: ApiPromise) => {
 
     const registerRepaymentTransfer = (
         transferKind: TransferKind,
-        repaymentAmount: BigInt,
+        repaymentAmount: BN,
         dealOrderId: DealOrderId,
         txHash: string,
         borrower: KeyringPair,
