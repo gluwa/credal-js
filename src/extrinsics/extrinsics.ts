@@ -22,6 +22,7 @@ import {
 import { KeyringPair } from '@polkadot/keyring/types';
 import { lockDealOrderAsync } from './lock-deal-order';
 import { closeDealOrderAsync } from './close-deal-order';
+import { exemptLoanAsync } from './exempt';
 
 export const extrinsics = (api: ApiPromise) => {
     const registerAddress = (externalAddress: string, blockchain: Blockchain, signer: KeyringPair) =>
@@ -97,6 +98,8 @@ export const extrinsics = (api: ApiPromise) => {
     const closeDealOrder = (dealOrderId: DealOrderId, transferId: TransferId, borrower: KeyringPair) =>
         closeDealOrderAsync(api, dealOrderId, transferId, borrower);
 
+    const exemptLoan = (dealOrderId: DealOrderId, lender: KeyringPair) => exemptLoanAsync(api, dealOrderId, lender);
+
     return {
         registerAddress,
         addAskOrder,
@@ -109,5 +112,6 @@ export const extrinsics = (api: ApiPromise) => {
         lockDealOrder,
         registerRepaymentTransfer,
         closeDealOrder,
+        exemptLoan,
     };
 };
