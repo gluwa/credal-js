@@ -1,5 +1,4 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { GenericEventData } from '@polkadot/types';
 import { Codec } from '@polkadot/types-codec/types';
 import { TupleId } from '../model';
 

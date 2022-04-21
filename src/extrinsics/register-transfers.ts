@@ -1,4 +1,5 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
+import { BN } from '@polkadot/util';
 import { Blockchain, DealOrderId, Transfer, TransferId, TransferKind } from '../model';
 import { u8aConcat, u8aToU8a } from '@polkadot/util';
 import { blake2AsHex } from '@polkadot/util-crypto';
@@ -42,7 +43,7 @@ export const registerFundingTransfer = async (
 export const registerRepaymentTransfer = async (
     api: ApiPromise,
     transferKind: TransferKind,
-    repaymentAmount: BigInt,
+    repaymentAmount: BN,
     dealOrderId: DealOrderId,
     txHash: string,
     borrower: KeyringPair,
@@ -105,7 +106,7 @@ export const registerFundingTransferAsync = async (
 export const registerRepaymentTransferAsync = async (
     api: ApiPromise,
     transferKind: TransferKind,
-    repaymentAmount: BigInt,
+    repaymentAmount: BN,
     dealOrderId: DealOrderId,
     txHash: string,
     signer: KeyringPair,

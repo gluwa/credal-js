@@ -2,7 +2,7 @@ import { ContractFactory, ethers, Signer, Wallet } from 'ethers';
 import { TestToken } from './ethless/typechain';
 import TestTokenArtifact from './ethless/contracts/TestToken.sol/TestToken.json';
 import { JsonRpcProvider } from '@ethersproject/providers';
-
+import { BN } from '@polkadot/util';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -12,14 +12,14 @@ const signTransfer = async (
     tokenAddress: string,
     from: Signer,
     to: string,
-    amount: BigInt,
+    amount: BN,
     fee: number,
     nonce: BigInt,
 ) => {
     const fromAddress = await from.getAddress();
     const hash = ethers.utils.solidityKeccak256(
         ['uint8', 'uint256', 'address', 'address', 'address', 'uint256', 'uint256', 'uint256'],
-        [domain, chainId, tokenAddress, fromAddress, to, amount, fee, nonce],
+        [domain, chainId, tokenAddress, fromAddress, to, amount.toString(), fee, nonce],
     );
     return from.signMessage(ethers.utils.arrayify(hash));
 };
@@ -42,7 +42,7 @@ const ethlessTransfer = async (
     token: TestToken,
     fromSigner: Signer,
     to: string,
-    amount: BigInt,
+    amount: BN,
     fee: number,
     nonce: BigInt,
 ) => {
@@ -55,7 +55,7 @@ const ethlessTransfer = async (
         ['transfer(address,address,uint256,uint256,uint256,bytes)'](
             fromAddress,
             to,
-            amount.valueOf(),
+            amount.toString(),
             fee,
             nonce.valueOf(),
             signature,
@@ -80,7 +80,7 @@ export const ethConnection = async (providerRpcUrl = 'http://localhost:8545') =>
         lender: Wallet,
         borrower: string,
         dealOrderId: string,
-        amount: BigInt,
+        amount: BN,
     ): Promise<[string, string, number]> => {
         await fundAccount(testToken, minter, lender.address, 1_000_000);
 
@@ -92,27 +92,12 @@ export const ethConnection = async (providerRpcUrl = 'http://localhost:8545') =>
         return [testToken.address, transferReceipt.transactionHash, transferReceipt.blockNumber];
     };
 
-<<<<<<< HEAD
     const repay = async (
         borrower: Wallet,
         lender: string,
         dealOrderId: string,
-        amount: BigInt,
+        amount: BN,
     ): Promise<[string, string, number]> => {
-=======
-    const lend = async (lender: Wallet, borrower: string, dealOrderId: string, amount: BigInt) => {
-        await fundAccount(testToken, minter, lender.address, 1_000_000);
-
-        const nonce = BigInt(dealOrderId);
-
-        const transferReceipt = await ethlessTransfer(minter, 3, testToken, lender, borrower, amount, 0, nonce);
-
-        console.log(transferReceipt);
-        return [testToken.address, transferReceipt.transactionHash];
-    };
-
-    const repay = async (borrower: Wallet, lender: string, dealOrderId: string, amount: BigInt) => {
->>>>>>> add registerRepaymentTransfer functionality
         await fundAccount(testToken, minter, borrower.address, 1_000_000);
 
         const nonce = BigInt(dealOrderId);
@@ -120,13 +105,7 @@ export const ethConnection = async (providerRpcUrl = 'http://localhost:8545') =>
         const transferReceipt = await ethlessTransfer(minter, 3, testToken, borrower, lender, amount, 0, nonce);
 
         console.log(transferReceipt);
-<<<<<<< HEAD
         return [testToken.address, transferReceipt.transactionHash, transferReceipt.blockNumber];
     };
     return { lend, repay, waitUntilTip };
-=======
-        return [testToken.address, transferReceipt.transactionHash];
-    };
-    return { lend, repay };
->>>>>>> add registerRepaymentTransfer functionality
 };

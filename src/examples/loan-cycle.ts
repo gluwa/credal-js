@@ -1,4 +1,5 @@
 import { Keyring } from '@polkadot/api';
+import { BN } from '@polkadot/util';
 import { creditcoinApi } from '../creditcoin-api';
 import { Wallet } from 'ethers';
 import { Guid } from 'js-guid';
@@ -7,9 +8,6 @@ import { ethConnection } from './ethereum';
 import { TransferKind } from '../model';
 import dotenv from 'dotenv';
 import { setupAuthority } from './setup-authority';
-import { createBidOrderId } from 'credal-js/extrinsics/add-bid-order';
-import { createDealOrderId } from 'credal-js/extrinsics/add-deal-order';
-import { createOfferId } from 'credal-js/extrinsics/add-offer';
 dotenv.config();
 
 const main = async () => {
@@ -37,7 +35,7 @@ const main = async () => {
 
     const expBlock = 1000000;
     const loanTerms = {
-        amount: BigInt(100),
+        amount: new BN(100),
         interestRate: {
             ratePerPeriod: 10,
             decimals: 4,
