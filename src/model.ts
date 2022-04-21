@@ -77,6 +77,16 @@ export type DealOrder = {
     block?: number;
 };
 
+export type DealOrderEvent = {
+    dealOrderId: DealOrderId;
+    dealOrder: DealOrder;
+};
+
+export type DealOrderClosed = DealOrderEvent;
+export type DealOrderFunded = DealOrderEvent;
+export type DealOrderAdded = DealOrderEvent;
+export type DealOrderLocked = DealOrderEvent;
+
 export type TransferId = string;
 
 export type Erc20 = { kind: 'Erc20'; contractAddress: ExternalAddress };
@@ -97,4 +107,9 @@ export type Transfer = {
     processed: boolean;
     accountId: AccountId;
     timestamp?: Date;
+};
+
+export type TransferProcessed = {
+    transferId: TransferId;
+    transfer: Transfer;
 };

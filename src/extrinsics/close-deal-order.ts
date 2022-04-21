@@ -1,32 +1,35 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { DealOrderFunded, DealOrderId, TransferId, TransferProcessed } from '../model';
+import { DealOrderId, TransferId } from '../model';
 import { createDealOrder, createTransfer } from '../transforms';
 import { TxCallback } from '../types';
 import { handleTransaction, handleTransactionFailed, processEvents } from './common';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { DealOrderClosed, TransferProcessed } from '../model';
 
-export const fundDealOrder = async (
+export const closeDealOrder = async (
     api: ApiPromise,
     dealOrderId: DealOrderId,
     transferId: TransferId,
-    lender: KeyringPair,
+    borrower: KeyringPair,
     onSuccess: TxCallback,
     onFail: TxCallback,
 ) => {
     const ccDealOrderId = api.createType('PalletCreditcoinDealOrderId', dealOrderId);
     const unsubscribe: () => void = await api.tx.creditcoin
-        .fundDealOrder(ccDealOrderId, transferId)
-        .signAndSend(lender, { nonce: -1 }, (result) => handleTransaction(api, unsubscribe, result, onSuccess, onFail));
+        .closeDealOrder(ccDealOrderId, transferId)
+        .signAndSend(borrower, { nonce: -1 }, (result) =>
+            handleTransaction(api, unsubscribe, result, onSuccess, onFail),
+        );
 };
 
-export const processDealOrderFunded = (
+export const processDealOrderClosed = (
     api: ApiPromise,
     result: SubmittableResult,
-): [DealOrderFunded, TransferProcessed] => {
+): [DealOrderClosed, TransferProcessed] => {
     const { itemId: dealOrderId, item: dealOrder } = processEvents(
         api,
         result,
-        'DealOrderFunded',
+        'DealOrderClosed',
         'PalletCreditcoinDealOrder',
         createDealOrder,
     );
@@ -43,15 +46,15 @@ export const processDealOrderFunded = (
     ];
 };
 
-export const fundDealOrderAsync = (
+export const closeDealOrderAsync = (
     api: ApiPromise,
     dealOrderId: DealOrderId,
     transferId: TransferId,
     lender: KeyringPair,
 ) => {
-    return new Promise<[DealOrderFunded, TransferProcessed]>((resolve, reject) => {
+    return new Promise<[DealOrderClosed, TransferProcessed]>((resolve, reject) => {
         const onFail = (result: SubmittableResult) => reject(handleTransactionFailed(api, result));
-        const onSuccess = (result: SubmittableResult) => resolve(processDealOrderFunded(api, result));
-        fundDealOrder(api, dealOrderId, transferId, lender, onSuccess, onFail).catch((reason) => reject(reason));
+        const onSuccess = (result: SubmittableResult) => resolve(processDealOrderClosed(api, result));
+        closeDealOrder(api, dealOrderId, transferId, lender, onSuccess, onFail).catch((reason) => reject(reason));
     });
 };

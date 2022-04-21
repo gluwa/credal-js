@@ -1,14 +1,9 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { DealOrder, DealOrderId } from '../model';
+import { DealOrderLocked, DealOrderId } from '../model';
 import { createDealOrder } from '../transforms';
 import { TxCallback } from '../types';
 import { handleTransaction, handleTransactionFailed, processEvents } from './common';
 import { KeyringPair } from '@polkadot/keyring/types';
-
-export type DealOrderLocked = {
-    dealOrderId: DealOrderId;
-    dealOrder: DealOrder;
-};
 
 export const lockDealOrder = async (
     api: ApiPromise,

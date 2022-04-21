@@ -1,15 +1,10 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { blake2AsHex } from '@polkadot/util-crypto';
-import { DealOrder, DealOrderId, OfferId } from '../model';
+import { DealOrderAdded, DealOrderId, OfferId } from '../model';
 import { createDealOrder } from '../transforms';
 import { TxCallback } from '../types';
 import { handleTransaction, handleTransactionFailed, processEvents } from './common';
 import { KeyringPair } from '@polkadot/keyring/types';
-
-export type DealOrderAdded = {
-    dealOrderId: DealOrderId;
-    dealOrder: DealOrder;
-};
 
 export const createDealOrderId = (expirationBlock: number, offerId: OfferId): DealOrderId => [
     expirationBlock,
