@@ -68,8 +68,20 @@ export const ethConnection = async (providerRpcUrl = 'http://localhost:8545') =>
     const provider = new JsonRpcProvider(providerRpcUrl);
     const minter = new Wallet(process.env.PK1 || '', provider);
     const testToken = await deployTestToken(minter);
+    await provider.send('evm_setIntervalMining', [500]);
 
-    const lend = async (lender: Wallet, borrower: string, dealOrderId: string, amount: BigInt) => {
+    const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
+
+    const waitUntilTip = async (tip: number) => {
+        while ((await provider.getBlockNumber()) <= tip) await sleep(1000);
+    };
+
+    const lend = async (
+        lender: Wallet,
+        borrower: string,
+        dealOrderId: string,
+        amount: BigInt,
+    ): Promise<[string, string, number]> => {
         await fundAccount(testToken, minter, lender.address, 1_000_000);
 
         const nonce = BigInt(dealOrderId);
@@ -77,10 +89,15 @@ export const ethConnection = async (providerRpcUrl = 'http://localhost:8545') =>
         const transferReceipt = await ethlessTransfer(minter, 3, testToken, lender, borrower, amount, 0, nonce);
 
         console.log(transferReceipt);
-        return [testToken.address, transferReceipt.transactionHash];
+        return [testToken.address, transferReceipt.transactionHash, transferReceipt.blockNumber];
     };
 
-    const repay = async (borrower: Wallet, lender: string, dealOrderId: string, amount: BigInt) => {
+    const repay = async (
+        borrower: Wallet,
+        lender: string,
+        dealOrderId: string,
+        amount: BigInt,
+    ): Promise<[string, string, number]> => {
         await fundAccount(testToken, minter, borrower.address, 1_000_000);
 
         const nonce = BigInt(dealOrderId);
@@ -88,7 +105,7 @@ export const ethConnection = async (providerRpcUrl = 'http://localhost:8545') =>
         const transferReceipt = await ethlessTransfer(minter, 3, testToken, borrower, lender, amount, 0, nonce);
 
         console.log(transferReceipt);
-        return [testToken.address, transferReceipt.transactionHash];
+        return [testToken.address, transferReceipt.transactionHash, transferReceipt.blockNumber];
     };
-    return { lend, repay };
+    return { lend, repay, waitUntilTip };
 };

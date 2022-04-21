@@ -13,8 +13,6 @@ import dotenv from 'dotenv';
 import { setupAuthority } from './setupAuthority';
 dotenv.config();
 
-const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
-
 const main = async () => {
     const { api, extrinsics } = await creditcoinApi('ws://127.0.0.1:9944');
     const {
@@ -102,8 +100,8 @@ const main = async () => {
     console.log(dealOrder2);
     const dealOrder2Id = dealOrder2.dealOrder.dealOrderId;
 
-    const { lend, repay } = await ethConnection();
-    const [tokenAddress, lendTxHash] = await lend(
+    const { lend, repay, waitUntilTip } = await ethConnection();
+    const [tokenAddress, lendTxHash, lendBlockNumber] = await lend(
         lenderWallet,
         borrowerWallet.address,
         dealOrder2Id[1],
@@ -112,7 +110,8 @@ const main = async () => {
     console.log('token address ', tokenAddress, 'tx hash ', lendTxHash);
 
     console.log('waiting for confirmations');
-    await sleep(15000);
+    await waitUntilTip(lendBlockNumber + 12);
+
     const transferKind: TransferKind = { kind: 'Ethless', contractAddress: tokenAddress };
 
     const { waitForVerification, transfer, transferId } = await registerFundingTransfer(
@@ -133,8 +132,13 @@ const main = async () => {
     const lockedDealOrder = await lockDealOrder(dealOrder2Id, borrower);
     console.log(lockedDealOrder);
 
-    const [, repayTxHash] = await repay(borrowerWallet, lenderWallet.address, dealOrder2Id[1], loanTerms.amount);
-    await sleep(15000);
+    const [, repayTxHash, repayBlockNumber] = await repay(
+        borrowerWallet,
+        lenderWallet.address,
+        dealOrder2Id[1],
+        loanTerms.amount,
+    );
+    await waitUntilTip(repayBlockNumber + 12);
 
     const registeredRepayment = await registerRepaymentTransfer(
         transferKind,
