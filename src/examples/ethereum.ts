@@ -98,14 +98,9 @@ export const ethConnection = async (providerRpcUrl = 'http://localhost:8545') =>
         dealOrderId: string,
         amount: BN,
     ): Promise<[string, string, number]> => {
-        await fundAccount(testToken, minter, borrower.address, 1_000_000);
-
-        const nonce = BigInt(dealOrderId);
-
-        const transferReceipt = await ethlessTransfer(minter, 3, testToken, borrower, lender, amount, 0, nonce);
-
-        console.log(transferReceipt);
-        return [testToken.address, transferReceipt.transactionHash, transferReceipt.blockNumber];
+        // calls lend() with swapped arguments
+        const result = await lend(borrower, lender, dealOrderId, amount);
+        return result;
     };
     return { lend, repay, waitUntilTip };
 };
