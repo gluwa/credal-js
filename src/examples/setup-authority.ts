@@ -4,7 +4,7 @@ import { addAuthorityAsync } from '../extrinsics/add-authority';
 import { Option, Null, u64 } from '@polkadot/types';
 
 const AUTHORITY_PUBKEY = '0x0238bcdc4d9ab1ef09a2f18ea49e512aafabaab02d21a8c6ff7d2ecee1f2a34d';
-const AUTHORITY_SURI = '0x6d8a666749c001267f44b8cb7b4c90ff19815ced4591430e5717c02e8276f0fc';
+const AUTHORITY_SURI = 'version energy retire rely olympic figure shop stumble fence trust spider civil';
 const AUTHORITY_ACCOUNTID = '5C7conswAmt3HJrSyhcehWo7qqwy4f2thW2P2VLz1x4yMW6e';
 
 export const setupAuthority = async (api: ApiPromise, sudoSigner: KeyringPair) => {

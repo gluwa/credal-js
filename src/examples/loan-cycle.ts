@@ -11,7 +11,11 @@ import { setupAuthority } from './setup-authority';
 dotenv.config();
 
 const main = async () => {
-    const { api, extrinsics } = await creditcoinApi('ws://127.0.0.1:9944');
+    const {
+        api,
+        extrinsics,
+        utils: { signAccountId },
+    } = await creditcoinApi('ws://127.0.0.1:9944');
     const {
         registerAddress,
         addAskOrder,
@@ -55,8 +59,8 @@ const main = async () => {
 
     // Prepare a borrower and lender by registering their ethereum addresses
     const [lenderAddress, borrowerAddress] = await Promise.all([
-        registerAddress(lenderWallet.address, 'Ethereum', lender),
-        registerAddress(borrowerWallet.address, 'Ethereum', borrower),
+        registerAddress(lenderWallet.address, 'Ethereum', signAccountId(lenderWallet, lender.address), lender),
+        registerAddress(borrowerWallet.address, 'Ethereum', signAccountId(borrowerWallet, borrower.address), borrower),
     ]);
     console.log('lender address', lenderAddress);
     console.log('borrower address', borrowerAddress);

@@ -22,12 +22,13 @@ export const registerAddress = async (
     api: ApiPromise,
     externalAddress: string,
     blockchain: Blockchain,
+    ownershipProof: string,
     signer: KeyringPair,
     onSuccess: TxCallback,
     onFail: TxCallback,
 ) => {
     const unsubscribe: () => void = await api.tx.creditcoin
-        .registerAddress(blockchain, externalAddress)
+        .registerAddress(blockchain, externalAddress, ownershipProof)
         .signAndSend(signer, { nonce: -1 }, (result) => handleTransaction(api, unsubscribe, result, onSuccess, onFail));
 };
 
@@ -40,11 +41,14 @@ export const registerAddressAsync = async (
     api: ApiPromise,
     externalAddress: string,
     blockchain: Blockchain,
+    ownershipProof: string,
     signer: KeyringPair,
 ) => {
     return new Promise<AddressRegistered>((resolve, reject) => {
         const onFail = (result: SubmittableResult) => reject(handleTransactionFailed(api, result));
         const onSuccess = (result: SubmittableResult) => resolve(processAddressRegistered(api, result));
-        registerAddress(api, externalAddress, blockchain, signer, onSuccess, onFail).catch((reason) => reject(reason));
+        registerAddress(api, externalAddress, blockchain, ownershipProof, signer, onSuccess, onFail).catch((reason) =>
+            reject(reason),
+        );
     });
 };
