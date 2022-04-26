@@ -26,8 +26,12 @@ import { closeDealOrderAsync } from './close-deal-order';
 import { exemptLoanAsync } from './exempt';
 
 export const extrinsics = (api: ApiPromise) => {
-    const registerAddress = (externalAddress: string, blockchain: Blockchain, signer: KeyringPair) =>
-        registerAddressAsync(api, externalAddress, blockchain, signer);
+    const registerAddress = (
+        externalAddress: string,
+        blockchain: Blockchain,
+        ownershipProof: string,
+        signer: KeyringPair,
+    ) => registerAddressAsync(api, externalAddress, blockchain, ownershipProof, signer);
 
     const addAskOrder = (
         lenderAddressId: AddressId,
