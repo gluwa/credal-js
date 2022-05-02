@@ -19,10 +19,13 @@ export type Duration = {
     nanos: number;
 };
 
+export type InterestType = 'Simple' | 'Compound';
+
 export type InterestRate = {
     ratePerPeriod: number;
     decimals: number;
     period: Duration;
+    interestType: InterestType;
 };
 
 export type LoanTerms = {

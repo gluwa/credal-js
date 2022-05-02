@@ -5,7 +5,7 @@ import { Wallet } from 'ethers';
 import { Guid } from 'js-guid';
 import { signLoanParams } from '../extrinsics/register-deal-order';
 import { ethConnection } from './ethereum';
-import { TransferKind } from '../model';
+import { LoanTerms, TransferKind } from '../model';
 import dotenv from 'dotenv';
 import { setupAuthority } from './setup-authority';
 dotenv.config();
@@ -38,7 +38,7 @@ const main = async () => {
     await setupAuthority(api, lender);
 
     const expBlock = 1000000;
-    const loanTerms = {
+    const loanTerms: LoanTerms = {
         amount: new BN(100),
         interestRate: {
             ratePerPeriod: 10,
@@ -47,6 +47,7 @@ const main = async () => {
                 secs: 60,
                 nanos: 0,
             },
+            interestType: 'Simple',
         },
         termLength: {
             secs: 6000,

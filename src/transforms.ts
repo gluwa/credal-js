@@ -43,10 +43,12 @@ export const createInterestRate = ({
     ratePerPeriod,
     decimals,
     period,
+    interestType,
 }: PalletCreditcoinLoanTermsInterestRate): InterestRate => ({
     ratePerPeriod: ratePerPeriod.toNumber(),
     decimals: decimals.toNumber(),
     period: createDuration(period),
+    interestType: interestType.type,
 });
 
 export const createLoanTerms = ({ amount, interestRate, termLength }: PalletCreditcoinLoanTerms): LoanTerms => ({
