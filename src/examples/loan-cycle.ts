@@ -10,7 +10,7 @@ import dotenv from 'dotenv';
 import { setupAuthority } from './setup-authority';
 dotenv.config();
 
-const main = async () => {
+export const main = async () => {
     const {
         api,
         extrinsics,
