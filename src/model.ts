@@ -82,23 +82,30 @@ export type DealOrder = {
     block?: number;
 };
 
-export type DealOrderEvent = {
-    dealOrderId: DealOrderId;
-    dealOrder: DealOrder;
+type EventReturnIdType<IdType> = {
+    itemId: IdType;
 };
 
-export type DealOrderClosed = DealOrderEvent;
-export type DealOrderFunded = DealOrderEvent;
-export type DealOrderAdded = DealOrderEvent;
-export type DealOrderLocked = DealOrderEvent;
+type EventReturnDataType<DataType> = {
+    item: DataType;
+};
 
-export type TransferId = string;
+export type EventReturnJoinType<Id, Data> = EventReturnIdType<Id> & EventReturnDataType<Data>;
+
+export type EventReturnType<I, D> = EventReturnIdType<I> | EventReturnJoinType<I, D>;
+
+export type DealOrderAdded = EventReturnJoinType<DealOrderId, DealOrder>;
+export type DealOrderFunded = EventReturnIdType<DealOrderId>;
+export type DealOrderLocked = EventReturnIdType<DealOrderId>;
+export type DealOrderClosed = EventReturnIdType<DealOrderId>;
 
 export type Erc20 = { kind: 'Erc20'; contractAddress: ExternalAddress };
 export type Ethless = { kind: 'Ethless'; contractAddress: ExternalAddress };
 export type Other = { kind: 'Other'; value: ExternalAddress };
 export type Native = { kind: 'Native' };
 export type TransferKind = Erc20 | Ethless | Native | Other;
+
+export type TransferId = string;
 
 export type Transfer = {
     blockchain: Blockchain;
@@ -114,7 +121,4 @@ export type Transfer = {
     timestamp?: Date;
 };
 
-export type TransferProcessed = {
-    transferId: TransferId;
-    transfer: Transfer;
-};
+export type TransferProcessed = EventReturnJoinType<TransferId, Transfer>;

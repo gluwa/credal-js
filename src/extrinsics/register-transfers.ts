@@ -1,6 +1,6 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { BN } from '@polkadot/util';
-import { Blockchain, DealOrderId, Transfer, TransferId, TransferKind } from '../model';
+import { Blockchain, DealOrderId, Transfer, TransferId, TransferKind, TransferProcessed } from '../model';
 import { u8aConcat, u8aToU8a } from '@polkadot/util';
 import { blake2AsHex } from '@polkadot/util-crypto';
 import { createCreditcoinTransferKind, createTransfer } from '../transforms';
@@ -14,7 +14,7 @@ export type TransferEventKind = 'TransferRegistered' | 'TransferVerified' | 'Tra
 export type TransferEvent = {
     kind: TransferEventKind;
     transferId: TransferId;
-    transfer: Transfer;
+    transfer?: Transfer;
     waitForVerification: (timeout?: number) => Promise<Transfer>;
 };
 
@@ -79,9 +79,15 @@ export const verifiedTransfer = async (api: ApiPromise, transferId: TransferId, 
 };
 
 const processTransferEvent = (api: ApiPromise, result: SubmittableResult, kind: TransferEventKind): TransferEvent => {
-    const { itemId, item } = processEvents(api, result, kind, 'PalletCreditcoinTransfer', createTransfer);
+    const { itemId, item } = processEvents(
+        api,
+        result,
+        kind,
+        'PalletCreditcoinTransfer',
+        createTransfer,
+    ) as TransferProcessed;
 
-    const transferEventData = { kind, transferId: itemId as TransferId, transfer: item };
+    const transferEventData = { kind, transferId: itemId, transfer: item };
     const waitForVerification = (timeout = 180_000) => verifiedTransfer(api, transferEventData.transferId, timeout);
     return { ...transferEventData, waitForVerification };
 };

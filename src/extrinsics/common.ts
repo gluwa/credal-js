@@ -1,6 +1,6 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { Codec } from '@polkadot/types-codec/types';
-import { TupleId } from '../model';
+import { EventReturnType } from '../model';
 
 export const handleTransactionFailed = (api: ApiPromise, result: SubmittableResult) => {
     const { dispatchError } = result;
@@ -51,24 +51,29 @@ export const handleTransaction = (
     }
 };
 
-type EventData<ItemType> = {
-    itemId: TupleId | string;
-    item: ItemType;
-};
-
-export const processEvents = <ItemType, SourceType extends Codec>(
+export const processEvents = <IdType, ItemType, SourceType extends Codec>(
     api: ApiPromise,
     result: SubmittableResult,
     eventMethod: string,
     creditcoinType: string,
     transform: (data: SourceType) => ItemType,
-): EventData<ItemType> => {
+): EventReturnType<IdType, ItemType> => {
     const { events } = result;
     const sourceEvents = events.find(({ event }) => event.method === eventMethod);
     if (!sourceEvents) throw new Error(`No ${eventMethod} events found`);
 
-    const [id, dataItem] = sourceEvents.event.data;
-    const itemId = id.toJSON() as TupleId | string;
-    const sourceItem = api.createType(creditcoinType, dataItem) as SourceType;
-    return { itemId, item: transform(sourceItem) };
+    const [id, codecItem] = sourceEvents.event.data;
+
+    const itemId = id.toJSON() as unknown as IdType;
+
+    const transformWrapper = (dataItem: Codec, transformFn: (data: SourceType) => ItemType) => {
+        const sourceItem = api.createType(creditcoinType, dataItem) as SourceType;
+        return transformFn(sourceItem);
+    };
+
+    if (codecItem != null) {
+        return { itemId, item: transformWrapper(codecItem, transform) };
+    } else {
+        return { itemId };
+    }
 };

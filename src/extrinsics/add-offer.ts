@@ -1,5 +1,5 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { AskOrderId, BidOrderId, Offer, OfferId } from '../model';
+import { AskOrderId, BidOrderId, Offer, OfferId, EventReturnJoinType } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { handleTransaction, handleTransactionFailed, processEvents } from './common';
 import { TxCallback } from '../types';
@@ -7,10 +7,7 @@ import { createOffer } from '../transforms';
 import { blake2AsHex } from '@polkadot/util-crypto';
 import { u8aConcat } from '@polkadot/util';
 
-export type OfferAdded = {
-    offerId: OfferId;
-    offer: Offer;
-};
+export type OfferAdded = EventReturnJoinType<OfferId, Offer>;
 
 export const createOfferId = (expirationBlock: number, askOrderId: AskOrderId, bidOrderId: BidOrderId): OfferId => {
     const key = blake2AsHex(u8aConcat(askOrderId[1], bidOrderId[1]));
@@ -34,8 +31,7 @@ export const addOffer = async (
 };
 
 export const processOfferAdded = (api: ApiPromise, result: SubmittableResult): OfferAdded => {
-    const { itemId, item } = processEvents(api, result, 'OfferAdded', 'PalletCreditcoinOffer', createOffer);
-    return { offerId: itemId as OfferId, offer: item };
+    return processEvents(api, result, 'OfferAdded', 'PalletCreditcoinOffer', createOffer) as OfferAdded;
 };
 
 export const addOfferAsync = async (

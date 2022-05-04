@@ -1,5 +1,5 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { Address, AddressId, Blockchain } from '../model';
+import { Address, AddressId, Blockchain, EventReturnJoinType } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { handleTransaction, handleTransactionFailed, processEvents } from './common';
 import { TxCallback } from '../types';
@@ -7,10 +7,7 @@ import { createAddress } from '../transforms';
 import { u8aConcat, u8aToU8a } from '@polkadot/util';
 import { blake2AsHex } from '@polkadot/util-crypto';
 
-export type AddressRegistered = {
-    addressId: string;
-    address: Address;
-};
+export type AddressRegistered = EventReturnJoinType<AddressId, Address>;
 
 export const createAddressId = (blockchain: Blockchain, externalAddress: string) => {
     const blockchainBytes = Buffer.from(blockchain.toString().toLowerCase());
@@ -33,8 +30,13 @@ export const registerAddress = async (
 };
 
 const processAddressRegistered = (api: ApiPromise, result: SubmittableResult): AddressRegistered => {
-    const { itemId, item } = processEvents(api, result, 'AddressRegistered', 'PalletCreditcoinAddress', createAddress);
-    return { addressId: itemId as AddressId, address: item };
+    return processEvents(
+        api,
+        result,
+        'AddressRegistered',
+        'PalletCreditcoinAddress',
+        createAddress,
+    ) as AddressRegistered;
 };
 
 export const registerAddressAsync = async (
