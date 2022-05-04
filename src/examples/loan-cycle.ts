@@ -71,20 +71,20 @@ export const main = async () => {
         // A lender adds an ask order and borrower adds a bid order
         const askGuid = Guid.newGuid();
         const bidGuid = Guid.newGuid();
-        const [{ askOrderId, askOrder }, { bidOrderId, bidOrder }] = await Promise.all([
-            addAskOrder(lenderAddress.addressId, loanTerms, expBlock, askGuid, lender),
-            addBidOrder(borrowerAddress.addressId, loanTerms, expBlock, bidGuid, borrower),
+        const [{ itemId: askOrderId, item: askOrder }, { itemId: bidOrderId, item: bidOrder }] = await Promise.all([
+            addAskOrder(lenderAddress.itemId, loanTerms, expBlock, askGuid, lender),
+            addBidOrder(borrowerAddress.itemId, loanTerms, expBlock, bidGuid, borrower),
         ]);
         console.log(askOrder);
         console.log(bidOrder);
 
         // A lender makes an offer connecting the ask and bid
-        const { offerId, offer } = await addOffer(askOrderId, bidOrderId, expBlock, lender);
+        const { itemId: offerId, item: offer } = await addOffer(askOrderId, bidOrderId, expBlock, lender);
         console.log(offer);
         console.log(offerId);
 
         // A borrower accepts the offer by making a new Deal Order
-        const { dealOrderId, dealOrder } = await addDealOrder(offerId, expBlock, borrower);
+        const { itemId: dealOrderId, item: dealOrder } = await addDealOrder(offerId, expBlock, borrower);
         console.log(dealOrder);
         console.log(dealOrderId);
 
@@ -170,8 +170,8 @@ export const main = async () => {
 
         // register a deal order
         const { dealOrder } = await registerDealOrder(
-            lenderAddress.addressId,
-            borrowerAddress.addressId,
+            lenderAddress.itemId,
+            borrowerAddress.itemId,
             loanTerms,
             expBlock,
             askGuid,
@@ -181,7 +181,7 @@ export const main = async () => {
             lender,
         );
         console.log(dealOrder);
-        const { dealOrderId } = dealOrder;
+        const { itemId: dealOrderId } = dealOrder;
 
         // connect to ethereum to lend and repay
         const { lend, waitUntilTip } = await ethConnection();

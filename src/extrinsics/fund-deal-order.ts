@@ -23,24 +23,21 @@ export const processDealOrderFunded = (
     api: ApiPromise,
     result: SubmittableResult,
 ): [DealOrderFunded, TransferProcessed] => {
-    const { itemId: dealOrderId, item: dealOrder } = processEvents(
+    const deal = processEvents(
         api,
         result,
         'DealOrderFunded',
         'PalletCreditcoinDealOrder',
         createDealOrder,
-    );
-    const { itemId: transferId, item: transfer } = processEvents(
+    ) as DealOrderFunded;
+    const transfer = processEvents(
         api,
         result,
         'TransferProcessed',
         'PalletCreditcoinTransfer',
         createTransfer,
-    );
-    return [
-        { dealOrderId: dealOrderId as DealOrderId, dealOrder },
-        { transferId: transferId as TransferId, transfer },
-    ];
+    ) as TransferProcessed;
+    return [deal, transfer];
 };
 
 export const fundDealOrderAsync = (

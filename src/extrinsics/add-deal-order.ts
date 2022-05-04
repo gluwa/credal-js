@@ -28,8 +28,7 @@ export const addDealOrder = async (
 };
 
 export const processDealOrderAdded = (api: ApiPromise, result: SubmittableResult): DealOrderAdded => {
-    const { itemId, item } = processEvents(api, result, 'DealOrderAdded', 'PalletCreditcoinDealOrder', createDealOrder);
-    return { dealOrderId: itemId as DealOrderId, dealOrder: item };
+    return processEvents(api, result, 'DealOrderAdded', 'PalletCreditcoinDealOrder', createDealOrder) as DealOrderAdded;
 };
 
 export const addDealOrderAsync = (api: ApiPromise, offerId: OfferId, expirationBlock: number, signer: KeyringPair) => {

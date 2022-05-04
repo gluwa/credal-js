@@ -1,5 +1,5 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { AddressId, BidOrder, BidOrderId, LoanTerms } from '../model';
+import { AddressId, BidOrder, BidOrderId, LoanTerms, EventReturnJoinType } from '../model';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { handleTransaction, handleTransactionFailed, processEvents } from './common';
 import { TxCallback } from '../types';
@@ -7,10 +7,7 @@ import { createBidOrder, createCreditcoinLoanTerms } from '../transforms';
 import { Guid } from 'js-guid';
 import { blake2AsHex } from '@polkadot/util-crypto';
 
-export type BidOrderAdded = {
-    bidOrderId: BidOrderId;
-    bidOrder: BidOrder;
-};
+export type BidOrderAdded = EventReturnJoinType<BidOrderId, BidOrder>;
 
 export const createBidOrderId = (expirationBlock: number, guid: Guid): BidOrderId =>
     [expirationBlock, blake2AsHex(guid.toString())] as BidOrderId;
@@ -31,8 +28,7 @@ export const addBidOrder = async (
 };
 
 export const processBidOrderAdded = (api: ApiPromise, result: SubmittableResult): BidOrderAdded => {
-    const { itemId, item } = processEvents(api, result, 'BidOrderAdded', 'PalletCreditcoinBidOrder', createBidOrder);
-    return { bidOrderId: itemId as BidOrderId, bidOrder: item };
+    return processEvents(api, result, 'BidOrderAdded', 'PalletCreditcoinBidOrder', createBidOrder) as BidOrderAdded;
 };
 
 export const addBidOrderAsync = async (

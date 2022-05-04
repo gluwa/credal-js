@@ -21,14 +21,13 @@ export const lockDealOrder = async (
 };
 
 export const processDealOrderLocked = (api: ApiPromise, result: SubmittableResult): DealOrderLocked => {
-    const { itemId: dealOrderId, item: dealOrder } = processEvents(
+    return processEvents(
         api,
         result,
         'DealOrderLocked',
         'PalletCreditcoinDealOrder',
         createDealOrder,
-    );
-    return { dealOrderId: dealOrderId as DealOrderId, dealOrder };
+    ) as DealOrderLocked;
 };
 
 export const lockDealOrderAsync = (

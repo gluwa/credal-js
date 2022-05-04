@@ -16,7 +16,8 @@
         "format": "prettier --write \"src/**/*.ts\"",
         "lint": "eslint -c .eslintrc.js --ext .ts ./src",
         "typecheck": "tsc --noEmit",
-        "prepare": "npm run build"
+        "prepare": "npm run build",
+        "test": "$npm_execpath example"
     },
     "devDependencies": {
         "@polkadot/typegen": "^7.15.1",

@@ -26,24 +26,21 @@ export const processDealOrderClosed = (
     api: ApiPromise,
     result: SubmittableResult,
 ): [DealOrderClosed, TransferProcessed] => {
-    const { itemId: dealOrderId, item: dealOrder } = processEvents(
+    const closedDeal = processEvents(
         api,
         result,
         'DealOrderClosed',
         'PalletCreditcoinDealOrder',
         createDealOrder,
-    );
-    const { itemId: transferId, item: transfer } = processEvents(
+    ) as DealOrderClosed;
+    const processedTransfer = processEvents(
         api,
         result,
         'TransferProcessed',
         'PalletCreditcoinTransfer',
         createTransfer,
-    );
-    return [
-        { dealOrderId: dealOrderId as DealOrderId, dealOrder },
-        { transferId: transferId as TransferId, transfer },
-    ];
+    ) as TransferProcessed;
+    return [closedDeal, processedTransfer];
 };
 
 export const closeDealOrderAsync = (
