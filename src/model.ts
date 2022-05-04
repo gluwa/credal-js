@@ -82,17 +82,16 @@ export type DealOrder = {
     block?: number;
 };
 
-type EventReturnIdType<IdType> = {
-    itemId: IdType;
+type EventReturnIdType<Id> = {
+    itemId: Id;
 };
 
-type EventReturnDataType<DataType> = {
-    item: DataType;
+type EventReturnDataType<Data> = {
+    item: Data;
 };
 
 export type EventReturnJoinType<Id, Data> = EventReturnIdType<Id> & EventReturnDataType<Data>;
-
-export type EventReturnType<I, D> = EventReturnIdType<I> | EventReturnJoinType<I, D>;
+export type EventReturnType<Id, Data> = EventReturnIdType<Id> | EventReturnJoinType<Id, Data>;
 
 export type DealOrderAdded = EventReturnJoinType<DealOrderId, DealOrder>;
 export type DealOrderFunded = EventReturnIdType<DealOrderId>;
