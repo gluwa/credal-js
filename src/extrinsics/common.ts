@@ -71,9 +71,5 @@ export const processEvents = <IdType, ItemType, SourceType extends Codec>(
         return transformFn(sourceItem);
     };
 
-    if (codecItem != null) {
-        return { itemId, item: transformWrapper(codecItem, transform) };
-    } else {
-        return { itemId };
-    }
+    return codecItem ? { itemId, item: transformWrapper(codecItem, transform) } : { itemId };
 };
